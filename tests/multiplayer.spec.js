@@ -127,7 +127,7 @@ test.describe('Multiplayer simulation', () => {
     );
     expect(aliceScore).toBeGreaterThan(0);
     expect(bobScore).toBe(0);
-    expect(bobScore).toBeGreaterThan(aliceScore);
+    expect(aliceScore).toBeGreaterThan(bobScore); // fixed: was bobScore > aliceScore
 
     // Alice's row should be highlighted as "self" in her own tab.
     await expect(
