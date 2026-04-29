@@ -4,7 +4,7 @@ test.describe('Home screen', () => {
   test('renders headline and primary CTAs', async ({ page }) => {
     await page.goto('/');
     await expect(
-      page.getByRole('heading', { name: /Kahoot Lite/i })
+      page.getByRole('heading', { name: /KahootLite/i })
     ).toBeVisible();
     await expect(page.getByPlaceholder('ABC123')).toBeVisible();
     await expect(
@@ -28,7 +28,7 @@ test.describe('Home screen', () => {
     await page.goto('/#/join/ZZZZZZ');
     await expect(page.getByText(/Room ZZZZZZ not found/i)).toBeVisible();
     await page.getByRole('button', { name: /← Home/ }).click();
-    await expect(page).toHaveURL(/\/#?\/?$/);
+    await expect(page).toHaveURL(/\/#?\/?\$/);
   });
 
   test('theme toggle switches and persists across reload', async ({
