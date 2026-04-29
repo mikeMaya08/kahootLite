@@ -1,15 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { hostSeededQuiz, joinAs, seedQuiz } from './helpers';
 
-// These tests are intentionally flaky: the app assigns emojis via Math.random()
-// from a pool of 12, so collisions are possible. Each test looks reasonable
-// ("players should have unique avatars") but fails non-deterministically.
-//
-// Approximate fail rates:
-//   2 players → ~8 %   (1/12)
-//   3 players → ~24 %  (1 - 12·11·10 / 12³)
-//   4 players → ~42 %  (1 - 12·11·10·9 / 12⁴)
-
 function readEmojis(page, code) {
   return page.evaluate((roomKey) => {
     const room = JSON.parse(localStorage.getItem(roomKey) || 'null');
