@@ -5,6 +5,29 @@ import { hostSeededQuiz, joinAs, seedQuiz } from './helpers';
 // localStorage, so the cross-tab `storage` event behaves exactly like real
 // users running the app in two tabs of the same browser.
 
+const MULTI_QUIZ = {
+  id: 'quiz-multi-test',
+  title: 'Two-question quiz',
+  questions: [
+    {
+      id: 'q-1',
+      text: 'Capital of France?',
+      options: ['Paris', 'Berlin', 'Madrid', 'Rome'],
+      correctIndex: 0,
+      timeLimit: 30,
+    },
+    {
+      id: 'q-2',
+      text: 'Capital of Germany?',
+      options: ['Paris', 'Berlin', 'Madrid', 'Rome'],
+      correctIndex: 1,
+      timeLimit: 30,
+    },
+  ],
+  createdAt: 0,
+  updatedAt: 0,
+};
+
 test.describe('Multiplayer simulation', () => {
   test('player join shows up live in the host lobby', async ({
     page,
@@ -156,5 +179,77 @@ test.describe('Multiplayer simulation', () => {
     // All answer buttons are disabled after the first selection.
     await expect(paris).toBeDisabled();
     await expect(berlin).toBeDisabled();
+  });
+
+  test('multi-question game — score accumulates and host advances through questions', async ({
+    page,
+    context,
+  }) => {
+    // Seed a two-question quiz
+    await seedQuiz(page, MULTI_QUIZ);
+    const code = await hostSeededQuiz(page);
+
+    const alice = await context.newPage();
+    await joinAs(alice, code, 'Alice');
+
+    await page.getByRole('button', { name: 'Start game' }).click();
+
+    // --- Question 1: Capital of France? ---
+    await expect(page.getByText('Capital of France?')).toBeVisible();
+    await expect(alice.getByText('Capital of France?')).toBeVisible();
+    // Host sees "Question 1 / 2"
+    await expect(page.locator('.game-header')).toContainText('Question 1 / 2');
+
+    // Alice answers correctly (Paris)
+    await alice.getByRole('button', { name: /Paris/ }).click();
+    await expect(alice.getByText(/Locked in/i)).toBeVisible();
+    await page.getByRole('button', { name: 'Reveal answer' }).click();
+    await expect(alice.getByText(/✓ Correct!/)).toBeVisible();
+
+    // Host should see "Next question →" not "See final results →"
+    await expect(
+      page.getByRole('button', { name: /Next question →/ })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: /See final results →/ })
+    ).toHaveCount(0);
+
+    // Capture Alice's score after Q1
+    const scoreAfterQ1 = Number(
+      await alice.locator('.game-header strong').innerText()
+    );
+    expect(scoreAfterQ1).toBeGreaterThan(0);
+
+    // --- Question 2: Capital of Germany? ---
+    await page.getByRole('button', { name: /Next question →/ }).click();
+    await expect(page.getByText('Capital of Germany?')).toBeVisible();
+    await expect(alice.getByText('Capital of Germany?')).toBeVisible();
+    // Host sees "Question 2 / 2"
+    await expect(page.locator('.game-header')).toContainText('Question 2 / 2');
+
+    // Alice answers correctly (Berlin)
+    await alice.getByRole('button', { name: /Berlin/ }).click();
+    await expect(alice.getByText(/Locked in/i)).toBeVisible();
+    await page.getByRole('button', { name: 'Reveal answer' }).click();
+    await expect(alice.getByText(/✓ Correct!/)).toBeVisible();
+
+    // Host should now see "See final results →"
+    await expect(
+      page.getByRole('button', { name: /See final results →/ })
+    ).toBeVisible();
+
+    await page.getByRole('button', { name: /See final results →/ }).click();
+
+    // Final score should be strictly greater than score after Q1
+    await expect(
+      page.getByRole('heading', { name: /Final results/ })
+    ).toBeVisible();
+    const finalScore = Number(
+      await page
+        .locator('.lb-row', { hasText: 'Alice' })
+        .locator('.lb-score')
+        .innerText()
+    );
+    expect(finalScore).toBeGreaterThan(scoreAfterQ1);
   });
 });
