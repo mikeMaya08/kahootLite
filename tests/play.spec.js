@@ -43,4 +43,20 @@ test.describe('Play screen', () => {
     // Alice's score in the header should remain 0
     await expect(player.locator('.game-header')).toContainText('0 pts');
   });
+
+  test('redirects to /join when landing on /play without a valid session', async ({
+    page,
+    context,
+  }) => {
+    await seedQuiz(page);
+    const code = await hostSeededQuiz(page);
+
+    // Open a fresh tab with no playerId in sessionStorage — simulates
+    // someone navigating directly to /play/:code without having joined
+    const stranger = await context.newPage();
+    await stranger.goto(`/#/play/${code}`);
+
+    // Should be bounced back to the join screen for that room
+    await expect(stranger).toHaveURL(new RegExp(`#/join/${code}`));
+  });
 });
