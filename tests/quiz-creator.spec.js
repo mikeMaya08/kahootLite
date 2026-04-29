@@ -71,4 +71,59 @@ test.describe('Quiz creator', () => {
     expect(stored).toHaveLength(1);
     expect(stored[0].title).toBe('Snap quiz');
   });
+
+  test('blocks save when correct answer points to an empty option', async ({
+    page,
+  }) => {
+    await page.getByLabel('Quiz title').fill('Bad quiz');
+    await page.getByLabel('Question text').fill('What is 2 + 2?');
+    await page.getByPlaceholder('Option A').fill('4');
+    await page.getByPlaceholder('Option B').fill('5');
+    // Correct answer defaults to Option A (index 0), which is filled.
+    // We switch it to Option C which is intentionally left empty.
+    await page.getByLabel('Correct answer').selectOption({ index: 2 });
+
+    await page.getByRole('button', { name: 'Save quiz' }).click();
+
+    await expect(
+      page.getByText(/correct option is empty/i)
+    ).toBeVisible();
+  });
+
+  test('edit route pre-fills the form with existing quiz data', async ({
+    page,
+  }) => {
+    // Seed a quiz directly into localStorage
+    const quiz = {
+      id: 'quiz-edit-test',
+      title: 'Geography Quiz',
+      questions: [
+        {
+          id: 'q-1',
+          text: 'Capital of Spain?',
+          options: ['Madrid', 'Lisbon', 'Paris', 'Rome'],
+          correctIndex: 0,
+          timeLimit: 30,
+        },
+      ],
+      createdAt: 0,
+      updatedAt: 0,
+    };
+    await page.evaluate((q) => {
+      localStorage.setItem('kahootlite:quizzes', JSON.stringify([q]));
+    }, quiz);
+
+    await page.goto('/#/edit/quiz-edit-test');
+
+    // Title and question fields should be pre-filled
+    await expect(page.getByLabel('Quiz title')).toHaveValue('Geography Quiz');
+    await expect(page.getByLabel('Question text')).toHaveValue('Capital of Spain?');
+    await expect(page.getByPlaceholder('Option A')).toHaveValue('Madrid');
+    await expect(page.getByPlaceholder('Option B')).toHaveValue('Lisbon');
+
+    // Page heading should say "Edit quiz" not "New quiz"
+    await expect(
+      page.getByRole('heading', { name: 'Edit quiz' })
+    ).toBeVisible();
+  });
 });
