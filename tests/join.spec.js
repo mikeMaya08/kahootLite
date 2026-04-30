@@ -20,7 +20,9 @@ test.describe('Join screen', () => {
 
     const player = await context.newPage();
     await player.goto(`/#/join/${code}`);
-    await player.getByLabel('Your nickname').fill('ThisNicknameIsWayTooLong');
+    const input = player.getByLabel('Your nickname');
+    await input.evaluate((el) => { el.removeAttribute('maxlength'); });
+    await input.fill('ThisNicknameIsWayTooLong');
     await player.getByRole('button', { name: /Join game/ }).click();
 
     await expect(
