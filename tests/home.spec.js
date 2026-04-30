@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Home screen', () => {
   test('renders headline and primary CTAs', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
     await expect(
       page.getByRole('heading', { name: /KahootLite/i })
     ).toBeVisible();
@@ -19,6 +20,7 @@ test.describe('Home screen', () => {
     page,
   }) => {
     await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
     await page.getByPlaceholder('ABC123').fill('ABC123');
     await page.getByRole('button', { name: /Join game →/ }).click();
     await expect(page).toHaveURL(/#\/join\/ABC123$/);
@@ -26,15 +28,17 @@ test.describe('Home screen', () => {
 
   test('shows "Room not found" when the PIN is invalid', async ({ page }) => {
     await page.goto('/#/join/ZZZZZZ');
+    await page.waitForLoadState('domcontentloaded');
     await expect(page.getByText(/Room ZZZZZZ not found/i)).toBeVisible();
     await page.getByRole('button', { name: /← Home/ }).click();
-    await expect(page).toHaveURL(/\/#?\/?\$/);
+    await expect(page).toHaveURL(/\/#?\/?$/);
   });
 
   test('theme toggle switches and persists across reload', async ({
     page,
   }) => {
     await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
     const html = page.locator('html');
     await expect(html).toHaveAttribute('data-theme', 'dark');
 
@@ -42,6 +46,7 @@ test.describe('Home screen', () => {
     await expect(html).toHaveAttribute('data-theme', 'light');
 
     await page.reload();
+    await page.waitForLoadState('domcontentloaded');
     await expect(html).toHaveAttribute('data-theme', 'light');
   });
 });
