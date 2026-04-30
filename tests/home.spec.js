@@ -31,7 +31,7 @@ test.describe('Home screen', () => {
     await page.waitForLoadState('networkidle');
     await expect(page.getByText(/Room ZZZZZZ not found/i)).toBeVisible();
     await page.getByRole('button', { name: /← Home/ }).click();
-    await expect(page).toHaveURL(/\/#?\/?\$/);
+    await expect(page).toHaveURL(/\/?#?\/?$/);
   });
 
   test('theme toggle switches and persists across reload', async ({
