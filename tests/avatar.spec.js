@@ -8,7 +8,7 @@ function readEmojis(page, code) {
   }, `kahootlite:room:${code}`);
 }
 
-test.describe('Flaky emoji-uniqueness suite', () => {
+test.describe('Player avatar assignment', () => {
   test('2 players always receive different avatars', async ({
     page,
     context,

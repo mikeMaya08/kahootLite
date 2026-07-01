@@ -61,10 +61,10 @@ export default function Join() {
     e.preventDefault();
     const trimmed = name.trim();
     if (trimmed.length < 1) {
-      setError('Pick a nickname.');
+      setError('Enter a nickname to continue.');
       return;
     }
-    if (trimmed.length > 20) {
+    if (trimmed.length > 30) {
       setError('Nickname must be 20 characters or fewer.');
       return;
     }

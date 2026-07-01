@@ -51,16 +51,16 @@ export default function QuizCreator() {
     }));
 
   const validate = (q) => {
-    if (!q.title.trim()) return 'Give your quiz a title.';
+    if (!q.title.trim()) return 'Please add a title.';
     if (q.questions.length === 0) return 'Add at least one question.';
     for (let i = 0; i < q.questions.length; i++) {
       const qu = q.questions[i];
       if (!qu.text.trim()) return `Question ${i + 1} needs text.`;
       const filled = qu.options.filter((o) => o.trim()).length;
       if (filled < 2)
-        return `Question ${i + 1} needs at least 2 answer options.`;
+        return `Question ${i + 1} needs 2 or more choices.`;
       if (!qu.options[qu.correctIndex]?.trim())
-        return `Question ${i + 1}'s correct option is empty.`;
+        return `Question ${i + 1}'s correct answer is missing.`;
     }
     return null;
   };
