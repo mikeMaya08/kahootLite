@@ -7,7 +7,7 @@ test.describe('Quiz creator', () => {
 
   test('blocks save when title is empty', async ({ page }) => {
     await page.getByRole('button', { name: 'Save quiz' }).click();
-    await expect(page.getByText(/Give your quiz a title/i)).toBeVisible();
+    await expect(page.getByText(/Please add a title\./i)).toBeVisible();
   });
 
   test('blocks save when fewer than 2 options are filled', async ({
@@ -18,7 +18,7 @@ test.describe('Quiz creator', () => {
     await page.getByPlaceholder('Option A').fill('Only one');
     await page.getByRole('button', { name: 'Save quiz' }).click();
     await expect(
-      page.getByText(/needs at least 2 answer options/i)
+      page.getByText(/needs 2 or more choices\./i)
     ).toBeVisible();
   });
 
@@ -86,7 +86,7 @@ test.describe('Quiz creator', () => {
     await page.getByRole('button', { name: 'Save quiz' }).click();
 
     await expect(
-      page.getByText(/correct option is empty/i)
+      page.getByText(/correct answer is missing\./i)
     ).toBeVisible();
   });
 
