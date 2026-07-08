@@ -28,7 +28,7 @@ test.describe('CandyMapper – Contact Form', () => {
     ).toBeVisible();
 
     // Enter a valid email and re-submit
-    await page.locator('[data-aid="CONTACT_FORM_EMAIL"]input').fill('migue@mailinator.com');
+    await page.locator('[data-aid="CONTACT_FORM_EMAIL"] input').fill('migue@mailinator.com');
     await page.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
 
     // Verify the success confirmation message
