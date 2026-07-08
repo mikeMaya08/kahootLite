@@ -4,12 +4,12 @@ test.describe('CandyMapper – Contact Form', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('https://candymapper.com/');
 
-    // Dismiss the Pop-Up Challenge modal using the "FIND MY CANDY!" link (id-based)
+    // Dismiss the Pop-Up Challenge modal using the X close icon
     const modal = page.locator('[data-aid="POPUP_MODAL"]');
-    const closeBtn = page.locator('#popup-widget5912-cta');
+    const closeIcon = page.locator('#popup-widget5912-close-icon');
 
     if (await modal.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await closeBtn.click();
+      await closeIcon.click();
       await expect(modal).not.toBeVisible();
     }
   });
