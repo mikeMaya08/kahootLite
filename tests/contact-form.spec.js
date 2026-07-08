@@ -15,10 +15,14 @@ test.describe('CandyMapper – Contact Form', () => {
   });
 
   test('shows email validation error then succeeds on valid submission', async ({ page }) => {
-    // Scroll to and click the First Name field before typing
-    await page.locator('[data-aid="First Name"] input').scrollIntoViewIfNeeded();
-    await page.locator('[data-aid="First Name"] input').click();
-    await page.locator('[data-aid="First Name"] input').type('Miguel');
+    // Wait for the form to be stable after modal dismissal, then type
+    const firstNameInput = page.locator('[data-aid="First Name"] input');
+    await firstNameInput.scrollIntoViewIfNeeded();
+    await expect(firstNameInput).toBeVisible();
+    await expect(firstNameInput).toBeEnabled();
+    await firstNameInput.click();
+    await firstNameInput.type('Miguel');
+    await expect(firstNameInput).toHaveValue('Miguel');
 
     // Click submit — should trigger email validation error
     await page.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
