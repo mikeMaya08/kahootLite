@@ -15,27 +15,30 @@ test.describe('CandyMapper – Contact Form', () => {
   });
 
   test('shows email validation error then succeeds on valid submission', async ({ page }) => {
-    // Scope all form interactions inside the form container
-    const form = page.locator('[data-aid="CONTACT_FORM_CONTAINER_REND"]');
-
-    // Type First Name and click submit — should trigger email validation error
-    await form.locator('input[data-aid="First Name"]').click();
-    await form.locator('input[data-aid="First Name"]').fill('Miguel');
-    await form.locator('[data-aid="CONTACT_FORM_TITLE_REND"]').click();
+    // Click and fill First Name
+    await page.locator('input[data-aid="First Name"]').click();
+    await page.locator('input[data-aid="First Name"]').fill('Miguel');
+    await page.locator('[data-aid="CONTACT_FORM_TITLE_REND"]').click();
     await page.waitForTimeout(2000);
-    await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').hover();
-    await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
+
+    // Click submit — should trigger email validation error
+    await page.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').hover();
+    await page.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
     await expect(
-      form.locator('[data-aid="CONTACT_EMAIL_ERR_REND"]')
+      page.locator('[data-aid="CONTACT_EMAIL_ERR_REND"]')
     ).toHaveText(/please enter a valid email address/i, { timeout: 15000 });
 
     // Enter a valid email and re-submit
-    await form.locator('input[data-aid="CONTACT_FORM_EMAIL"]').type('migue@mailinator.com');
-    await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
+    await page.locator('input[data-aid="CONTACT_FORM_EMAIL"]').click();
+    await page.locator('input[data-aid="CONTACT_FORM_EMAIL"]').fill('migue@mailinator.com');
+    await page.locator('[data-aid="CONTACT_FORM_TITLE_REND"]').click();
+    await page.waitForTimeout(2000);
+    await page.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').hover();
+    await page.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
 
     // Verify the success confirmation message
     await expect(
-      form.getByText(/thank you for your inquiry/i)
+      page.getByText(/thank you for your inquiry/i)
     ).toBeVisible();
   });
 });
