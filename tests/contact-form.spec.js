@@ -18,7 +18,7 @@ test.describe('CandyMapper – Contact Form', () => {
     // Scroll to and click the First Name field before typing
     await page.locator('[data-aid="First Name"] input').scrollIntoViewIfNeeded();
     await page.locator('[data-aid="First Name"] input').click();
-    await page.locator('[data-aid="First Name"] input').fill('Miguel');
+    await page.locator('[data-aid="First Name"] input').type('Miguel');
 
     // Scroll to and click submit — should trigger email validation error
     await page.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').scrollIntoViewIfNeeded();
@@ -28,7 +28,8 @@ test.describe('CandyMapper – Contact Form', () => {
     ).toHaveText(/please enter a valid email address/i, { timeout: 15000 });
 
     // Enter a valid email and re-submit
-    await page.locator('[data-aid="CONTACT_FORM_EMAIL"] input').fill('migue@mailinator.com');
+    await page.locator('[data-aid="CONTACT_FORM_EMAIL"] input').click();
+    await page.locator('[data-aid="CONTACT_FORM_EMAIL"] input').type('migue@mailinator.com');
     await page.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
 
     // Verify the success confirmation message
