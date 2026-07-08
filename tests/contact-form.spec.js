@@ -15,7 +15,15 @@ test.describe('CandyMapper – Contact Form', () => {
   });
 
   test('shows email validation error then succeeds on valid submission', async ({ page }) => {
-    // Scroll to the Contact Us section
+    // The contact form lives inside an iframe — scope all interactions to it
+    const formFrame = page.frameLocator('iframe[name*="form"], iframe[src*="godaddy"], iframe[src*="websitebuilder"], iframe').first();
+
+    // Try scoping to iframe first, fall back to main page if no iframe
+    const form = formFrame.locator('[data-aid="CONTACT_FORM_CONTAINER_REND"]').or(
+      page.locator('[data-aid="CONTACT_FORM_CONTAINER_REND"]')
+    );
+
+    // Scroll to the Contact Us section on main page
     await page.locator('[data-aid="CONTACT_SECTION_TITLE_REND"]').scrollIntoViewIfNeeded();
 
     // Fill in only First Name, leaving required Email empty
@@ -26,7 +34,7 @@ test.describe('CandyMapper – Contact Form', () => {
     await page.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
     await expect(
       page.locator('[data-aid="CONTACT_EMAIL_ERR_REND"]')
-    ).toBeVisible();
+    ).toHaveText(/please enter a valid email address/i);
 
     // Enter a valid email and re-submit
     await page.locator('[data-aid="CONTACT_FORM_EMAIL"] input').fill('migue@mailinator.com');
