@@ -27,7 +27,7 @@ test.describe('CandyMapper – Contact Form', () => {
     ).toHaveText(/please enter a valid email address/i, { timeout: 15000 });
 
     // Enter a valid email and re-submit
-    await form.locator('[data-aid="CONTACT_FORM_EMAIL"] input').type('migue@mailinator.com');
+    await form.locator('input[data-aid="CONTACT_FORM_EMAIL"]').type('migue@mailinator.com');
     await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
 
     // Verify the success confirmation message
