@@ -19,7 +19,7 @@ test.describe('CandyMapper – Contact Form', () => {
     await page.locator('[data-aid="CONTACT_SECTION_TITLE_REND"]').scrollIntoViewIfNeeded();
 
     // Fill in only First Name, leaving required Email empty
-    await page.locator('[data-aid="First Name"]input').fill('Miguel');
+    await page.locator('[data-aid="First Name"] input').fill('Miguel');
 
     // Submit — should trigger email validation error
     await page.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
