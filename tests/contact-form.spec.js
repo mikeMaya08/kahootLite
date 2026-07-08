@@ -19,7 +19,7 @@ test.describe('CandyMapper – Contact Form', () => {
     const form = page.locator('[data-aid="CONTACT_FORM_CONTAINER_REND"]');
 
     // Type First Name and click submit — should trigger email validation error
-    await form.locator('[data-aid="First Name"] input').type('Miguel');
+    await form.locator('input[data-aid="First Name"]').type('Miguel');
     await page.waitForTimeout(2000);
     await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
     await expect(
