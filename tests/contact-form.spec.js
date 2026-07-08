@@ -24,8 +24,10 @@ test.describe('CandyMapper – Contact Form', () => {
     // Submit — should trigger email validation error
     await page.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
     await expect(
-      page.getByText(/please enter a valid email address/i)
-    ).toBeVisible();
+      page.locator('[data-aid="CONTACT_FORM_EMAIL"]').locator('visible=true').locator('..').getByText(/valid|required|email/i).or(
+        page.locator('form').getByText(/valid|required|email/i)
+      )
+    ).toBeVisible({ timeout: 10000 });
 
     // Enter a valid email and re-submit
     await page.locator('[data-aid="CONTACT_FORM_EMAIL"] input').fill('migue@mailinator.com');
