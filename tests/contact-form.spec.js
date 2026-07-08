@@ -22,17 +22,16 @@ test.describe('CandyMapper – Contact Form', () => {
     await form.locator('[data-aid="First Name"] input').type('Miguel');
     await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
     await expect(
-      page.locator('[data-aid="CONTACT_EMAIL_ERR_REND"]')
+      form.locator('[data-aid="CONTACT_EMAIL_ERR_REND"]')
     ).toHaveText(/please enter a valid email address/i, { timeout: 15000 });
 
     // Enter a valid email and re-submit
-    await page.locator('[data-aid="CONTACT_FORM_EMAIL"] input').click();
-    await page.locator('[data-aid="CONTACT_FORM_EMAIL"] input').type('migue@mailinator.com');
-    await page.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
+    await form.locator('[data-aid="CONTACT_FORM_EMAIL"] input').type('migue@mailinator.com');
+    await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
 
     // Verify the success confirmation message
     await expect(
-      page.getByText(/thank you for your inquiry/i)
+      form.getByText(/thank you for your inquiry/i)
     ).toBeVisible();
   });
 });
