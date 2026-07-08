@@ -3,7 +3,6 @@ import { test, expect } from '@playwright/test';
 test.describe('CandyMapper – Contact Form', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('https://candymapper.com/');
-    await page.waitForLoadState('networkidle');
 
     // Dismiss the Pop-Up Challenge modal if it appears
     const closeBtn = page.locator('.modal button').filter({ hasText: /^x$/i })
