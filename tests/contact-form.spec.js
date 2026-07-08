@@ -21,7 +21,7 @@ test.describe('CandyMapper – Contact Form', () => {
     // Type First Name and click submit — should trigger email validation error
     await form.locator('input[data-aid="First Name"]').type('Miguel');
     await page.waitForTimeout(2000);
-    await expect(form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]')).toBeVisible();
+    await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').hover();
     await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
     await expect(
       form.locator('[data-aid="CONTACT_EMAIL_ERR_REND"]')
