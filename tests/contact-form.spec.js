@@ -18,11 +18,10 @@ test.describe('CandyMapper – Contact Form', () => {
     // Wait for the form container to be stable after modal dismissal
     await expect(page.locator('[data-aid="CONTACT_FORM_CONTAINER_REND"]')).toBeVisible();
 
-    // Type into First Name
+    // Type into First Name — use tap() to focus then type via the locator
     const firstNameInput = page.locator('[data-aid="First Name"] input');
-    await firstNameInput.scrollIntoViewIfNeeded();
-    await firstNameInput.click();
-    await page.keyboard.type('Miguel');
+    await firstNameInput.focus();
+    await firstNameInput.type('Miguel', { delay: 50 });
     await expect(firstNameInput).toHaveValue('Miguel');
 
     // Click submit — should trigger email validation error
