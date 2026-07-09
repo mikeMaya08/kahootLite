@@ -586,6 +586,12 @@ code {
   font-size: 0.95rem;
 }
 
+.streak-badge {
+  margin-left: 6px;
+  font-size: 0.85em;
+  color: var(--accent-strong);
+}
+
 .question-text {
   font-size: 1.6rem;
   text-align: center;
