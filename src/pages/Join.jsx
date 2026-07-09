@@ -87,6 +87,7 @@ export default function Join() {
         name: trimmed,
         emoji,
         score: players[playerId]?.score ?? 0,
+        streak: players[playerId]?.streak ?? 0,
         answers: players[playerId]?.answers ?? {},
         joinedAt: players[playerId]?.joinedAt ?? Date.now(),
       };
