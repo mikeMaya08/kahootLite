@@ -19,7 +19,6 @@ test.describe('CandyMapper – Contact Form', () => {
 
     // Type First Name, blur, then submit — should trigger email validation error
     await form.locator('input[data-aid="First Name"]').type('Miguel');
-    await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').hover();
     await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
     await expect(
       form.locator('[data-aid="CONTACT_EMAIL_ERR_REND"]')
@@ -27,7 +26,6 @@ test.describe('CandyMapper – Contact Form', () => {
 
     // Enter a valid email and re-submit
     await form.locator('input[data-aid="CONTACT_FORM_EMAIL"]').type('migue@mailinator.com');
-    await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').hover();
     await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
 
     // Verify the success confirmation message
