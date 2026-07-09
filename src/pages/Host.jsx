@@ -79,29 +79,21 @@ export default function Host() {
       for (const id of Object.keys(players)) {
         const p = players[id];
         const ans = p.answers?.[idx];
-        if (!ans) {
-          // No answer breaks the streak, same as a wrong answer.
-          if (p.streak) players[id] = { ...p, streak: 0 };
-          continue;
-        }
+        if (!ans) continue;
         if (ans.points != null) continue; // already scored client-side
         const correct = ans.choice === q.correctIndex;
         const remaining = Math.max(0, cur.questionEndTime - ans.answeredAt);
-        const streakBefore = p.streak || 0;
         const points = computePoints({
           correct,
           remainingMs: remaining,
           totalMs,
-          streak: streakBefore,
         });
-        const streak = correct ? streakBefore + 1 : 0;
         players[id] = {
           ...p,
           score: (p.score || 0) + points,
-          streak,
           answers: {
             ...p.answers,
-            [idx]: { ...ans, correct, points, streak },
+            [idx]: { ...ans, correct, points },
           },
         };
       }
@@ -123,7 +115,7 @@ export default function Host() {
             players: Object.fromEntries(
               Object.entries(cur.players || {}).map(([id, p]) => [
                 id,
-                { ...p, score: 0, streak: 0, answers: {} },
+                { ...p, score: 0, answers: {} },
               ])
             ),
           }

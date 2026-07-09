@@ -53,14 +53,11 @@ export default function Play() {
       const correct = choice === q.correctIndex;
       const totalMs = q.timeLimit * 1000;
       const remaining = Math.max(0, cur.questionEndTime - Date.now());
-      const streakBefore = player.streak || 0;
       const points = computePoints({
         correct,
         remainingMs: remaining,
         totalMs,
-        streak: streakBefore,
       });
-      const streak = correct ? streakBefore + 1 : 0;
 
       return {
         ...cur,
@@ -69,14 +66,12 @@ export default function Play() {
           [playerId]: {
             ...player,
             score: (player.score || 0) + points,
-            streak,
             answers: {
               ...player.answers,
               [qIndex]: {
                 choice,
                 correct,
                 points,
-                streak,
                 answeredAt: Date.now(),
               },
             },
@@ -149,9 +144,6 @@ export default function Play() {
         </span>
         <span className="muted">
           <strong>{me.score}</strong> pts
-          {me.streak >= 2 && (
-            <span className="streak-badge">🔥 {me.streak}</span>
-          )}
         </span>
       </header>
 
@@ -203,16 +195,9 @@ export default function Play() {
         <section className="card reveal-card">
           {myAnswer ? (
             myAnswer.correct ? (
-              <>
-                <h3 className="text-correct">
-                  ✓ Correct! +{myAnswer.points} pts
-                </h3>
-                {myAnswer.streak >= 2 && (
-                  <p className="muted center small">
-                    🔥 {myAnswer.streak} in a row!
-                  </p>
-                )}
-              </>
+              <h3 className="text-correct">
+                ✓ Correct! +{myAnswer.points} pts
+              </h3>
             ) : (
               <h3 className="text-wrong">✗ Not this time.</h3>
             )

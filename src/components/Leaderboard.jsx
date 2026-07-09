@@ -21,10 +21,7 @@ export default function Leaderboard({ players, highlightId, compact = false }) {
           <span className="lb-avatar" aria-hidden="true">
             {p.emoji ?? '🙂'}
           </span>
-          <span className="lb-name">
-            {p.name}
-            {p.streak >= 2 && <span className="streak-badge">🔥 {p.streak}</span>}
-          </span>
+          <span className="lb-name">{p.name}</span>
           <span className="lb-score">{p.score ?? 0}</span>
         </li>
       ))}
