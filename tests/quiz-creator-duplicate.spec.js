@@ -331,6 +331,79 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(page.getByText(/2 questions/i)).toBeVisible();
   });
 
+  // ── Insertion position — middle of list ───────────────────────────────────
+
+  test('duplicating a middle question inserts the clone between its neighbours', async ({
+    page,
+  }) => {
+    // Build a 3-question quiz: A → B → C
+    await page.getByLabel('Question text').fill('Question A');
+    await page.getByRole('button', { name: /\+ Add question/ }).click();
+    await page
+      .locator('.question-editor')
+      .nth(1)
+      .getByLabel('Question text')
+      .fill('Question B');
+    await page.getByRole('button', { name: /\+ Add question/ }).click();
+    await page
+      .locator('.question-editor')
+      .nth(2)
+      .getByLabel('Question text')
+      .fill('Question C');
+
+    // Duplicate the MIDDLE question (index 1, "Question B").
+    // Expected result: A → B → B-clone → C
+    await page
+      .locator('.question-editor')
+      .nth(1)
+      .getByRole('button', { name: 'Duplicate question' })
+      .click();
+
+    await expect(page.locator('.question-editor')).toHaveCount(4);
+    await expect(
+      page.locator('.question-editor').nth(0).getByLabel('Question text')
+    ).toHaveValue('Question A');
+    await expect(
+      page.locator('.question-editor').nth(1).getByLabel('Question text')
+    ).toHaveValue('Question B');
+    await expect(
+      page.locator('.question-editor').nth(2).getByLabel('Question text')
+    ).toHaveValue('Question B'); // the clone
+    await expect(
+      page.locator('.question-editor').nth(3).getByLabel('Question text')
+    ).toHaveValue('Question C');
+  });
+
+  // ── Validation after duplication ──────────────────────────────────────────
+
+  test('save is blocked when a cloned question has its text cleared', async ({
+    page,
+  }) => {
+    // Fill a minimal valid first question.
+    await page.getByLabel('Quiz title').fill('Validation after dup');
+    await page.getByLabel('Question text').fill('Original question');
+    await page.getByPlaceholder('Option A').fill('Yes');
+    await page.getByPlaceholder('Option B').fill('No');
+
+    // Duplicate — the clone starts with the same valid text.
+    await page.getByRole('button', { name: 'Duplicate question' }).click();
+    await expect(page.locator('.question-editor')).toHaveCount(2);
+
+    // Clear the clone's question text to make it invalid.
+    await page
+      .locator('.question-editor')
+      .nth(1)
+      .getByLabel('Question text')
+      .fill('');
+
+    // Attempt to save — validation must block and show an error for question 2.
+    await page.getByRole('button', { name: 'Save quiz' }).click();
+    await expect(page.getByText(/Question 2 needs text\./i)).toBeVisible();
+
+    // Still on the creator page — did not navigate away.
+    await expect(page).toHaveURL(/#\/create/);
+  });
+
   // ── Save & host after duplication ─────────────────────────────────────────
 
   test('"Save & host" with a duplicated question opens the lobby with a valid PIN', async ({
