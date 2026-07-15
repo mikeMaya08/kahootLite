@@ -228,6 +228,41 @@ test.describe('Quiz preview modal', () => {
     await expect(page.locator('.modal-overlay')).not.toBeVisible();
   });
 
+  test('question with no text renders "Untitled question" fallback', async ({ page }) => {
+    // Navigate to the creator without filling in the question text, then open preview
+    await page.goto('/#/create');
+    await page.getByLabel('Quiz title').fill('Fallback Test');
+    // Leave question text empty — only fill the required options
+    await page.getByPlaceholder('Option A').first().fill('Yes');
+    await page.getByPlaceholder('Option B').first().fill('No');
+
+    await page.getByRole('button', { name: '▶ Preview' }).click();
+    await expect(page.locator('.modal-overlay')).toBeVisible();
+
+    // QuizPreview renders current.text || 'Untitled question'
+    await expect(page.locator('.question-text')).toHaveText('Untitled question');
+  });
+
+  test('preview state resets to Q1 when closed and reopened', async ({ page }) => {
+    await openPreview(page, { questions: 2 });
+
+    // Answer Q1 and advance to Q2
+    await page.locator('.answers-grid .answer-option').nth(0).click();
+    await page.getByRole('button', { name: 'Next question →' }).click();
+
+    // We are now on Q2
+    await expect(page.locator('.preview-card .muted')).toHaveText('Q 2 / 2');
+
+    // Close the preview
+    await page.getByRole('button', { name: '✕ Close preview' }).click();
+    await expect(page.locator('.modal-overlay')).not.toBeVisible();
+
+    // Reopen the preview — state should be reset to Q1
+    await page.getByRole('button', { name: '▶ Preview' }).click();
+    await expect(page.locator('.modal-overlay')).toBeVisible();
+    await expect(page.locator('.preview-card .muted')).toHaveText('Q 1 / 2');
+  });
+
   test('preview works on edit route with pre-seeded quiz data', async ({ page }) => {
     // Seed a 2-question quiz directly into localStorage.
     const quiz = {
