@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import QuestionEditor from '../components/QuestionEditor';
+import QuizPreview from '../components/QuizPreview';
 import { useHashRoute } from '../hooks/useHashRoute';
 import { generateId } from '../utils/id';
 import { getQuiz, upsertQuiz } from '../utils/storage';
@@ -25,6 +26,7 @@ export default function QuizCreator() {
   const editingId = segments[1];
   const [quiz, setQuiz] = useState(blankQuiz);
   const [error, setError] = useState('');
+  const [previewing, setPreviewing] = useState(false);
 
   useEffect(() => {
     if (editingId) {
@@ -83,7 +85,14 @@ export default function QuizCreator() {
           ← Home
         </button>
         <h1>{editingId ? 'Edit quiz' : 'New quiz'}</h1>
+        <button className="btn btn-secondary" onClick={() => setPreviewing(true)}>
+          ▶ Preview
+        </button>
       </div>
+
+      {previewing && (
+        <QuizPreview quiz={quiz} onClose={() => setPreviewing(false)} />
+      )}
 
       <label className="field">
         <span>Quiz title</span>
