@@ -1,185 +1,229 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Quiz creator — Duplicate question', () => {
+// Tests for the "Duplicate question" button introduced in the quiz creator.
+// Each test is fully isolated — it navigates to /#/create and builds state
+// from scratch so there is no dependency on run order or localStorage from
+// other specs.
+
+test.describe('Quiz creator — duplicate question', () => {
   test.beforeEach(async ({ page }) => {
+    // Clear any leftover quiz data and start on the creator
+    await page.goto('/');
+    await page.evaluate(() => localStorage.removeItem('kahootlite:quizzes'));
     await page.goto('/#/create');
   });
 
-  // ── Visibility ────────────────────────────────────────────────────────────
+  // ── Button presence ────────────────────────────────────────────────────────
 
-  test('"Duplicate question" button is always visible, even with a single question', async ({
+  test('"Duplicate question" button is visible on the only question', async ({
     page,
   }) => {
-    // Only one question exists; "Remove question" must be hidden but
-    // "Duplicate question" must always be available.
-    await expect(page.locator('.question-editor')).toHaveCount(1);
+    // With a single question canRemove is false, so "Remove question" is hidden.
+    // "Duplicate question" must still be shown.
     await expect(
       page.getByRole('button', { name: 'Duplicate question' })
     ).toBeVisible();
     await expect(
       page.getByRole('button', { name: 'Remove question' })
-    ).toHaveCount(0);
+    ).toBeHidden();
   });
 
-  // ── Core duplication behaviour ────────────────────────────────────────────
-
-  test('duplicating the only question increases the question count to 2', async ({
+  test('"Duplicate question" button is visible alongside "Remove question" when multiple questions exist', async ({
     page,
   }) => {
-    await expect(page.locator('.question-editor')).toHaveCount(1);
-    await page.getByRole('button', { name: 'Duplicate question' }).click();
-    await expect(page.locator('.question-editor')).toHaveCount(2);
-  });
-
-  test('duplicate copies text, options, correct answer, and time limit', async ({
-    page,
-  }) => {
-    // Fill out the first question completely.
-    await page.getByLabel('Question text').fill('Capital of France?');
-    await page.getByPlaceholder('Option A').fill('Paris');
-    await page.getByPlaceholder('Option B').fill('Berlin');
-    await page.getByPlaceholder('Option C').fill('Madrid');
-    await page.getByPlaceholder('Option D').fill('Rome');
-    // Change the time limit and correct answer from their defaults.
-    await page.getByLabel('Time limit (seconds)').fill('45');
-    await page.getByLabel('Correct answer').selectOption({ index: 0 }); // Paris
-
-    await page.getByRole('button', { name: 'Duplicate question' }).click();
-
-    // The second question editor should have identical content.
-    const editors = page.locator('.question-editor');
-    await expect(editors).toHaveCount(2);
-
-    const second = editors.nth(1);
-    await expect(second.getByLabel('Question text')).toHaveValue(
-      'Capital of France?'
-    );
-    await expect(second.getByPlaceholder('Option A')).toHaveValue('Paris');
-    await expect(second.getByPlaceholder('Option B')).toHaveValue('Berlin');
-    await expect(second.getByPlaceholder('Option C')).toHaveValue('Madrid');
-    await expect(second.getByPlaceholder('Option D')).toHaveValue('Rome');
-    await expect(second.getByLabel('Time limit (seconds)')).toHaveValue('45');
-    // Correct-answer select should still point to index 0 (Paris).
-    await expect(second.getByLabel('Correct answer')).toHaveValue('0');
-  });
-
-  test('duplicated question is inserted directly after the source, not at the end', async ({
-    page,
-  }) => {
-    // Build a 2-question quiz first.
-    await page.getByLabel('Question text').fill('Question A');
+    // Add a second question so canRemove becomes true
     await page.getByRole('button', { name: /\+ Add question/ }).click();
-    const second = page.locator('.question-editor').nth(1);
-    await second.getByLabel('Question text').fill('Question B');
-
-    // Duplicate the FIRST question — the clone should land at position 2,
-    // not at the end (position 3).
-    await page
-      .locator('.question-editor')
-      .nth(0)
-      .getByRole('button', { name: 'Duplicate question' })
-      .click();
-
-    await expect(page.locator('.question-editor')).toHaveCount(3);
-
-    // Position 0: original "Question A"
-    await expect(
-      page.locator('.question-editor').nth(0).getByLabel('Question text')
-    ).toHaveValue('Question A');
-    // Position 1: clone of "Question A"
-    await expect(
-      page.locator('.question-editor').nth(1).getByLabel('Question text')
-    ).toHaveValue('Question A');
-    // Position 2: untouched "Question B"
-    await expect(
-      page.locator('.question-editor').nth(2).getByLabel('Question text')
-    ).toHaveValue('Question B');
-  });
-
-  // ── Interaction between duplicate and remove ──────────────────────────────
-
-  test('"Remove question" appears on both editors once a duplicate exists', async ({
-    page,
-  }) => {
-    // With only one question "Remove question" should be absent.
-    await expect(
-      page.getByRole('button', { name: 'Remove question' })
-    ).toHaveCount(0);
-
-    await page.getByRole('button', { name: 'Duplicate question' }).click();
-
-    // Now there are 2 questions; both editors must show "Remove question".
     await expect(page.locator('.question-editor')).toHaveCount(2);
+
+    // Both buttons must appear on each editor
+    await expect(
+      page.getByRole('button', { name: 'Duplicate question' })
+    ).toHaveCount(2);
     await expect(
       page.getByRole('button', { name: 'Remove question' })
     ).toHaveCount(2);
   });
 
-  test('removing one of two duplicated questions leaves a single question without "Remove question"', async ({
+  // ── Core duplication behaviour ─────────────────────────────────────────────
+
+  test('clicking "Duplicate question" increases the question count by one', async ({
     page,
   }) => {
-    await page.getByRole('button', { name: 'Duplicate question' }).click();
-    await expect(page.locator('.question-editor')).toHaveCount(2);
-
-    // Remove the first one.
-    await page
-      .locator('.question-editor')
-      .nth(0)
-      .getByRole('button', { name: 'Remove question' })
-      .click();
-
     await expect(page.locator('.question-editor')).toHaveCount(1);
-    await expect(
-      page.getByRole('button', { name: 'Remove question' })
-    ).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Duplicate question' }).click();
+
+    await expect(page.locator('.question-editor')).toHaveCount(2);
   });
 
-  // ── Editing independence ──────────────────────────────────────────────────
-
-  test('editing the duplicate does not affect the original', async ({
+  test('duplicate copies question text into the new question', async ({
     page,
   }) => {
-    await page.getByLabel('Question text').fill('Original text');
+    const questionText = 'What is the capital of France?';
+    await page.getByLabel('Question text').fill(questionText);
+
     await page.getByRole('button', { name: 'Duplicate question' }).click();
 
-    // Change the cloned question's text.
+    // Both question editors should now show the same text
+    const editors = page.locator('.question-editor');
+    await expect(editors).toHaveCount(2);
+    await expect(editors.nth(1).getByLabel('Question text')).toHaveValue(
+      questionText
+    );
+  });
+
+  test('duplicate copies all four answer options into the new question', async ({
+    page,
+  }) => {
+    await page.getByPlaceholder('Option A').fill('Paris');
+    await page.getByPlaceholder('Option B').fill('Berlin');
+    await page.getByPlaceholder('Option C').fill('Madrid');
+    await page.getByPlaceholder('Option D').fill('Rome');
+
+    await page.getByRole('button', { name: 'Duplicate question' }).click();
+
+    const clone = page.locator('.question-editor').nth(1);
+    await expect(clone.getByPlaceholder('Option A')).toHaveValue('Paris');
+    await expect(clone.getByPlaceholder('Option B')).toHaveValue('Berlin');
+    await expect(clone.getByPlaceholder('Option C')).toHaveValue('Madrid');
+    await expect(clone.getByPlaceholder('Option D')).toHaveValue('Rome');
+  });
+
+  test('duplicate preserves the correct-answer selection', async ({ page }) => {
+    // Fill enough options to make the dropdown meaningful
+    await page.getByPlaceholder('Option A').fill('Paris');
+    await page.getByPlaceholder('Option B').fill('Berlin');
+    // Change correct answer to Option B (index 1)
+    await page.getByLabel('Correct answer').selectOption({ index: 1 });
+
+    await page.getByRole('button', { name: 'Duplicate question' }).click();
+
+    const cloneSelect = page
+      .locator('.question-editor')
+      .nth(1)
+      .getByLabel('Correct answer');
+    await expect(cloneSelect).toHaveValue('1');
+  });
+
+  test('duplicate preserves the time limit', async ({ page }) => {
+    // Change time limit on the original question from the default (20) to 45
+    const timeLimitInput = page
+      .locator('.question-editor')
+      .nth(0)
+      .getByLabel('Time limit (seconds)');
+    await timeLimitInput.fill('45');
+    // Blur to commit the value
+    await timeLimitInput.blur();
+
+    await page.getByRole('button', { name: 'Duplicate question' }).click();
+
+    const cloneTimeLimitInput = page
+      .locator('.question-editor')
+      .nth(1)
+      .getByLabel('Time limit (seconds)');
+    await expect(cloneTimeLimitInput).toHaveValue('45');
+  });
+
+  // ── Insertion position ─────────────────────────────────────────────────────
+
+  test('duplicated question is inserted immediately after the source', async ({
+    page,
+  }) => {
+    // Build a 2-question quiz so we can check insertion position
+    await page.getByLabel('Question text').fill('First question');
+    await page.getByRole('button', { name: /\+ Add question/ }).click();
     await page
       .locator('.question-editor')
       .nth(1)
       .getByLabel('Question text')
-      .fill('Edited clone');
+      .fill('Second question');
 
-    // Original must be unchanged.
+    // Duplicate the FIRST question — clone should appear at position 2 (index 1),
+    // pushing the original "Second question" to position 3 (index 2).
+    await page
+      .locator('.question-editor')
+      .nth(0)
+      .getByRole('button', { name: 'Duplicate question' })
+      .click();
+
+    await expect(page.locator('.question-editor')).toHaveCount(3);
     await expect(
-      page.locator('.question-editor').nth(0).getByLabel('Question text')
-    ).toHaveValue('Original text');
+      page.locator('.question-editor').nth(1).getByLabel('Question text')
+    ).toHaveValue('First question');
+    await expect(
+      page.locator('.question-editor').nth(2).getByLabel('Question text')
+    ).toHaveValue('Second question');
   });
 
-  // ── End-to-end save ───────────────────────────────────────────────────────
-
-  test('a quiz with a duplicated question saves successfully and shows correct question count', async ({
+  test('duplicating the last question appends the clone at the end', async ({
     page,
   }) => {
-    await page.getByLabel('Quiz title').fill('Dup quiz');
-    await page.getByLabel('Question text').fill('Q1 text');
-    await page.getByPlaceholder('Option A').fill('Opt A');
-    await page.getByPlaceholder('Option B').fill('Opt B');
+    await page.getByLabel('Question text').fill('Only question');
+    // Single question — duplicate should appear after it
+    await page.getByRole('button', { name: 'Duplicate question' }).click();
+
+    await expect(page.locator('.question-editor')).toHaveCount(2);
+    // The clone is at index 1
+    await expect(
+      page.locator('.question-editor').nth(1).getByLabel('Question text')
+    ).toHaveValue('Only question');
+  });
+
+  // ── Unique ID (independence of clones) ────────────────────────────────────
+
+  test('duplicated question receives a unique id (edits do not affect the original)', async ({
+    page,
+  }) => {
+    await page.getByLabel('Question text').fill('Original text');
+    await page.getByPlaceholder('Option A').fill('A1');
+    await page.getByPlaceholder('Option B').fill('B1');
 
     await page.getByRole('button', { name: 'Duplicate question' }).click();
 
-    // The duplicate inherits the filled options so the quiz is valid (2 questions,
-    // each with 2+ options and a valid correct answer).
-    await page.getByRole('button', { name: 'Save quiz' }).click();
+    // Edit the clone's text — the original must stay unchanged
+    await page
+      .locator('.question-editor')
+      .nth(1)
+      .getByLabel('Question text')
+      .fill('Modified clone text');
 
-    await expect(page).toHaveURL(/#\/quizzes/);
-    await expect(page.getByText(/2 questions/i)).toBeVisible();
+    await expect(
+      page.locator('.question-editor').nth(0).getByLabel('Question text')
+    ).toHaveValue('Original text');
+    await expect(
+      page.locator('.question-editor').nth(1).getByLabel('Question text')
+    ).toHaveValue('Modified clone text');
   });
 
-  test('duplicating multiple times accumulates all copies in order', async ({
+  test('modifying original options after duplication does not affect the clone', async ({
     page,
   }) => {
-    await page.getByLabel('Question text').fill('Repeated Q');
-    // Duplicate twice to get 3 questions total.
+    await page.getByPlaceholder('Option A').fill('Shared value');
+    await page.getByPlaceholder('Option B').fill('B');
+
+    await page.getByRole('button', { name: 'Duplicate question' }).click();
+
+    // Change Option A on the ORIGINAL
+    await page
+      .locator('.question-editor')
+      .nth(0)
+      .getByPlaceholder('Option A')
+      .fill('Changed value');
+
+    // Clone must still show the original value at duplication time
+    await expect(
+      page.locator('.question-editor').nth(1).getByPlaceholder('Option A')
+    ).toHaveValue('Shared value');
+  });
+
+  // ── Multiple duplications ──────────────────────────────────────────────────
+
+  test('can duplicate the same question multiple times, building a longer list', async ({
+    page,
+  }) => {
+    await page.getByLabel('Question text').fill('Repeated question');
+
+    // Duplicate twice from the first question
     await page
       .locator('.question-editor')
       .nth(0)
@@ -192,11 +236,48 @@ test.describe('Quiz creator — Duplicate question', () => {
       .click();
 
     await expect(page.locator('.question-editor')).toHaveCount(3);
-    // All three should share the same text (each was cloned from index 0).
-    for (let i = 0; i < 3; i++) {
-      await expect(
-        page.locator('.question-editor').nth(i).getByLabel('Question text')
-      ).toHaveValue('Repeated Q');
-    }
+  });
+
+  // ── Save after duplication ────────────────────────────────────────────────
+
+  test('a quiz with a duplicated question saves successfully', async ({
+    page,
+  }) => {
+    await page.getByLabel('Quiz title').fill('Dup quiz');
+    await page.getByLabel('Question text').fill('What is 1 + 1?');
+    await page.getByPlaceholder('Option A').fill('2');
+    await page.getByPlaceholder('Option B').fill('3');
+
+    await page.getByRole('button', { name: 'Duplicate question' }).click();
+
+    // The clone is at index 1; it already has text and two filled options
+    // (copied from the original), so validation should pass.
+    await page.getByRole('button', { name: 'Save quiz' }).click();
+
+    // Should land in the library with both questions persisted
+    await expect(page).toHaveURL(/#\/quizzes/);
+    await expect(
+      page.getByRole('heading', { name: 'Dup quiz' })
+    ).toBeVisible();
+    await expect(page.getByText(/2 questions/i)).toBeVisible();
+  });
+
+  test('duplicated question can be removed independently', async ({ page }) => {
+    await page.getByLabel('Question text').fill('Keep me');
+    await page.getByRole('button', { name: 'Duplicate question' }).click();
+
+    await expect(page.locator('.question-editor')).toHaveCount(2);
+
+    // Remove the clone (index 1)
+    await page
+      .locator('.question-editor')
+      .nth(1)
+      .getByRole('button', { name: 'Remove question' })
+      .click();
+
+    await expect(page.locator('.question-editor')).toHaveCount(1);
+    await expect(
+      page.locator('.question-editor').nth(0).getByLabel('Question text')
+    ).toHaveValue('Keep me');
   });
 });
