@@ -33,6 +33,53 @@ async function openPreviewOnEditRoute(page, quiz) {
 // ---------------------------------------------------------------------------
 
 test.describe('Quiz preview — edge cases', () => {
+  // -------------------------------------------------------------------------
+  // 0. Close preview mid-answered state (after selecting an answer but before
+  //    clicking "Next question →" / "See results →"). Both the close button
+  //    and the advance button are visible at the same time — closing must
+  //    dismiss the modal without advancing.
+  // -------------------------------------------------------------------------
+  test('✕ Close preview dismisses the modal even after an answer is selected', async ({ page }) => {
+    const quiz = {
+      id: 'quiz-close-mid-answered',
+      title: 'Close After Answer Quiz',
+      questions: [
+        {
+          id: 'q-1',
+          text: 'Can you close after answering?',
+          options: ['Yes', 'No', '', ''],
+          correctIndex: 0,
+          timeLimit: 20,
+        },
+        {
+          id: 'q-2',
+          text: 'Second question',
+          options: ['Alpha', 'Beta', '', ''],
+          correctIndex: 1,
+          timeLimit: 20,
+        },
+      ],
+      createdAt: 0,
+      updatedAt: 0,
+    };
+
+    await openPreviewOnEditRoute(page, quiz);
+
+    // Answer Q1 — at this point both ✕ Close and "Next question →" are visible.
+    await page.locator('.answers-grid button').nth(0).click();
+
+    // The advance button should now be visible (confirming the answered state).
+    await expect(page.getByRole('button', { name: 'Next question →' })).toBeVisible();
+
+    // Click ✕ Close preview while still on the answered Q1 — modal must close.
+    await page.getByRole('button', { name: '✕ Close preview' }).click();
+
+    // Modal should be gone; we're back on the creator page.
+    await expect(page.locator('.modal-overlay')).not.toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Edit quiz' })).toBeVisible();
+  });
+
+
   test('shows "Untitled question" fallback when question text is empty', async ({ page }) => {
     // Seed a quiz with a question that has no text (empty string),
     // which hits the `current.text || 'Untitled question'` branch in QuizPreview.jsx.
