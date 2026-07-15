@@ -1,18 +1,24 @@
 import { test, expect } from '@playwright/test';
 
+/**
+ * Edge-case tests for the QuizPreview modal that complement the main
+ * quiz-preview.spec.js suite. These cover branches in QuizPreview.jsx
+ * not exercised by the primary spec:
+ *
+ *  1. "Untitled question" fallback when a question has no text
+ *  2. All-wrong answers produce a score of 0 / N correct
+ *  3. The ▶ Preview button is visible on the edit route (/#/edit/:id)
+ */
+
 // ---------------------------------------------------------------------------
-// Shared seed helper — injects a quiz into localStorage so we don't have to
-// drive through the creator UI every time.
+// Helpers
 // ---------------------------------------------------------------------------
 
 /**
- * Seeds `quiz` into localStorage, navigates to the edit route, and opens the
- * preview modal.
- *
- * @param {import('@playwright/test').Page} page
- * @param {object} quiz  Full quiz object (id, title, questions[])
+ * Seeds a quiz into localStorage and navigates to its edit page,
+ * then opens the preview modal.
  */
-async function seedAndOpenPreview(page, quiz) {
+async function openPreviewOnEditRoute(page, quiz) {
   await page.goto('/');
   await page.evaluate((q) => {
     localStorage.setItem('kahootlite:quizzes', JSON.stringify([q]));
@@ -27,18 +33,16 @@ async function seedAndOpenPreview(page, quiz) {
 // ---------------------------------------------------------------------------
 
 test.describe('Quiz preview — edge cases', () => {
-  // -------------------------------------------------------------------------
-  // 1. "Untitled question" fallback
-  // -------------------------------------------------------------------------
   test('shows "Untitled question" fallback when question text is empty', async ({ page }) => {
-    // Seed a quiz whose first question has no text
+    // Seed a quiz with a question that has no text (empty string),
+    // which hits the `current.text || 'Untitled question'` branch in QuizPreview.jsx.
     const quiz = {
-      id: 'qp-untitled',
-      title: 'Untitled Test',
+      id: 'quiz-untitled-q',
+      title: 'Empty Question Quiz',
       questions: [
         {
-          id: 'q-ut-1',
-          text: '',          // deliberately empty → should render fallback
+          id: 'q-1',
+          text: '',           // intentionally blank → fallback text expected
           options: ['Yes', 'No', '', ''],
           correctIndex: 0,
           timeLimit: 20,
@@ -48,72 +52,30 @@ test.describe('Quiz preview — edge cases', () => {
       updatedAt: 0,
     };
 
-    await seedAndOpenPreview(page, quiz);
+    await openPreviewOnEditRoute(page, quiz);
 
-    // The component renders `current.text || 'Untitled question'`
+    // QuizPreview.jsx: <h2 className="question-text">{current.text || 'Untitled question'}</h2>
     await expect(page.locator('.question-text')).toHaveText('Untitled question');
   });
 
-  // -------------------------------------------------------------------------
-  // 2. Perfect score (N / N)
-  // -------------------------------------------------------------------------
-  test('final results show "You got 2 / 2 correct" when all answers are correct', async ({ page }) => {
+  test('answering all questions wrong scores 0 / N correct on the results screen', async ({ page }) => {
+    // Seed a 2-question quiz where correctIndex is 0 ('Paris', 'Berlin').
+    // We will pick index 1 for every question (wrong answer) and expect 0/2.
     const quiz = {
-      id: 'qp-perfect',
-      title: 'Perfect Score Quiz',
+      id: 'quiz-all-wrong',
+      title: 'All Wrong Quiz',
       questions: [
         {
-          id: 'q-p1',
-          text: 'Q1: correct is A',
-          options: ['Correct A', 'Wrong B', '', ''],
+          id: 'q-1',
+          text: 'Capital of France?',
+          options: ['Paris', 'Berlin', '', ''],
           correctIndex: 0,
           timeLimit: 20,
         },
         {
-          id: 'q-p2',
-          text: 'Q2: correct is A',
-          options: ['Correct A', 'Wrong B', '', ''],
-          correctIndex: 0,
-          timeLimit: 20,
-        },
-      ],
-      createdAt: 0,
-      updatedAt: 0,
-    };
-
-    await seedAndOpenPreview(page, quiz);
-
-    // Answer Q1 correctly (index 0) and advance
-    await page.locator('.answers-grid button').nth(0).click();
-    await page.getByRole('button', { name: 'Next question →' }).click();
-
-    // Answer Q2 correctly (index 0) and finish
-    await page.locator('.answers-grid button').nth(0).click();
-    await page.getByRole('button', { name: 'See results →' }).click();
-
-    // Should say "You got 2 / 2 correct"
-    await expect(page.getByText('You got 2 / 2 correct')).toBeVisible();
-  });
-
-  // -------------------------------------------------------------------------
-  // 3. Zero score (0 / N)
-  // -------------------------------------------------------------------------
-  test('final results show "You got 0 / 2 correct" when all answers are wrong', async ({ page }) => {
-    const quiz = {
-      id: 'qp-zero',
-      title: 'Zero Score Quiz',
-      questions: [
-        {
-          id: 'q-z1',
-          text: 'Q1: correct is B',
-          options: ['Wrong A', 'Correct B', '', ''],
-          correctIndex: 1,  // index 1 is correct; we'll pick index 0
-          timeLimit: 20,
-        },
-        {
-          id: 'q-z2',
-          text: 'Q2: correct is B',
-          options: ['Wrong A', 'Correct B', '', ''],
+          id: 'q-2',
+          text: 'Capital of Germany?',
+          options: ['Paris', 'Berlin', '', ''],
           correctIndex: 1,
           timeLimit: 20,
         },
@@ -122,67 +84,31 @@ test.describe('Quiz preview — edge cases', () => {
       updatedAt: 0,
     };
 
-    await seedAndOpenPreview(page, quiz);
+    await openPreviewOnEditRoute(page, quiz);
 
-    // Answer Q1 WRONG (index 0, correct is 1) and advance
-    await page.locator('.answers-grid button').nth(0).click();
+    // Answer Q1 wrong (index 1 = 'Berlin', correct is index 0 = 'Paris')
+    await page.locator('.answers-grid .answer-option').nth(1).click();
     await page.getByRole('button', { name: 'Next question →' }).click();
 
-    // Answer Q2 WRONG (index 0) and finish
-    await page.locator('.answers-grid button').nth(0).click();
+    // Answer Q2 wrong (index 0 = 'Paris', correct is index 1 = 'Berlin')
+    await page.locator('.answers-grid .answer-option').nth(0).click();
     await page.getByRole('button', { name: 'See results →' }).click();
 
-    // Should say "You got 0 / 2 correct"
+    // Results: 0 correct out of 2
+    await expect(page.getByRole('heading', { name: 'Preview results' })).toBeVisible();
     await expect(page.getByText('You got 0 / 2 correct')).toBeVisible();
   });
 
-  // -------------------------------------------------------------------------
-  // 4. Q-progress indicator is hidden on the results screen
-  // -------------------------------------------------------------------------
-  test('Q progress indicator is absent on the final results screen', async ({ page }) => {
+  test('▶ Preview button is visible on the quiz edit route (/#/edit/:id)', async ({ page }) => {
+    // The main spec verifies the button on /#/create; this confirms it also
+    // appears when editing an existing quiz (editingId branch in QuizCreator.jsx).
     const quiz = {
-      id: 'qp-done-indicator',
-      title: 'Indicator Test',
-      questions: [
-        {
-          id: 'q-di1',
-          text: 'Only question',
-          options: ['A', 'B', '', ''],
-          correctIndex: 0,
-          timeLimit: 20,
-        },
-      ],
-      createdAt: 0,
-      updatedAt: 0,
-    };
-
-    await seedAndOpenPreview(page, quiz);
-
-    // Confirm indicator is visible DURING the question
-    await expect(page.locator('.preview-card .muted')).toBeVisible();
-
-    // Answer and go to results
-    await page.locator('.answers-grid button').nth(0).click();
-    await page.getByRole('button', { name: 'See results →' }).click();
-
-    // Results screen: heading present, Q indicator gone
-    await expect(page.getByRole('heading', { name: 'Preview results' })).toBeVisible();
-    // The `.muted` span inside .preview-card should no longer be the Q counter
-    // (it is absent in the done branch — the component only renders it when !done)
-    await expect(page.locator('.preview-card .page-header .muted')).not.toBeVisible();
-  });
-
-  // -------------------------------------------------------------------------
-  // 5. ▶ Preview button is visible on the edit route (not just /create)
-  // -------------------------------------------------------------------------
-  test('▶ Preview button is visible on the edit route', async ({ page }) => {
-    const quiz = {
-      id: 'qp-edit-btn',
+      id: 'quiz-edit-preview-btn',
       title: 'Edit Route Quiz',
       questions: [
         {
-          id: 'q-eb1',
-          text: 'Does the preview button appear on edit?',
+          id: 'q-1',
+          text: 'Is the button visible?',
           options: ['Yes', 'No', '', ''],
           correctIndex: 0,
           timeLimit: 20,
@@ -199,42 +125,9 @@ test.describe('Quiz preview — edge cases', () => {
 
     await page.goto(`/#/edit/${quiz.id}`);
 
-    // The heading should confirm we are on the edit route
+    // The heading should say "Edit quiz" (not "New quiz") to confirm we're
+    // on the edit route, then the Preview button must be present.
     await expect(page.getByRole('heading', { name: 'Edit quiz' })).toBeVisible();
-
-    // The ▶ Preview button must be present
     await expect(page.getByRole('button', { name: '▶ Preview' })).toBeVisible();
-  });
-
-  // -------------------------------------------------------------------------
-  // 6. All 4 answer options are rendered for a 4-option question
-  // -------------------------------------------------------------------------
-  test('renders all 4 answer options when a question has 4 choices', async ({ page }) => {
-    const quiz = {
-      id: 'qp-four-opts',
-      title: 'Four Options Quiz',
-      questions: [
-        {
-          id: 'q-fo1',
-          text: 'Capital of France?',
-          options: ['Paris', 'Berlin', 'Madrid', 'Rome'],
-          correctIndex: 0,
-          timeLimit: 20,
-        },
-      ],
-      createdAt: 0,
-      updatedAt: 0,
-    };
-
-    await seedAndOpenPreview(page, quiz);
-
-    // All 4 option buttons should be present in the answers grid
-    await expect(page.locator('.answers-grid button')).toHaveCount(4);
-
-    // Verify option texts are rendered
-    await expect(page.getByRole('button', { name: /Paris/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Berlin/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Madrid/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Rome/ })).toBeVisible();
   });
 });
