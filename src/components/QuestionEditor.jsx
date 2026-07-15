@@ -6,6 +6,7 @@ export default function QuestionEditor({
   index,
   onChange,
   onRemove,
+  onDuplicate,
   canRemove,
 }) {
   const update = (patch) => onChange({ ...question, ...patch });
@@ -83,13 +84,16 @@ export default function QuestionEditor({
         ))}
       </div>
 
-      {canRemove && (
-        <div className="row-end">
+      <div className="row-end">
+        <button type="button" className="btn btn-ghost" onClick={onDuplicate}>
+          Duplicate question
+        </button>
+        {canRemove && (
           <button type="button" className="btn btn-ghost" onClick={onRemove}>
             Remove question
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </fieldset>
   );
 }

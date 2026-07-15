@@ -52,6 +52,18 @@ export default function QuizCreator() {
       questions: q.questions.filter((_, i) => i !== idx),
     }));
 
+  const duplicateQuestion = (idx) =>
+    setQuiz((q) => {
+      const clone = {
+        ...q.questions[idx],
+        id: generateId('q'),
+        options: [...q.questions[idx].options],
+      };
+      const questions = [...q.questions];
+      questions.splice(idx + 1, 0, clone);
+      return { ...q, questions };
+    });
+
   const validate = (q) => {
     if (!q.title.trim()) return 'Please add a title.';
     if (q.questions.length === 0) return 'Add at least one question.';
@@ -112,6 +124,7 @@ export default function QuizCreator() {
             index={i}
             onChange={(next) => updateQuestion(i, next)}
             onRemove={() => removeQuestion(i)}
+            onDuplicate={() => duplicateQuestion(i)}
             canRemove={quiz.questions.length > 1}
           />
         ))}

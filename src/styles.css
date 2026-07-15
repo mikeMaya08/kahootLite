@@ -175,6 +175,7 @@ code {
 .row-end {
   display: flex;
   justify-content: flex-end;
+  gap: 10px;
 }
 .column {
   display: flex;
