@@ -86,7 +86,7 @@ test.describe('Quiz creator', () => {
     await page.getByRole('button', { name: 'Save quiz' }).click();
 
     await expect(
-      page.getByText(/correct option is empty/i)
+      page.getByText(/correct answer is missing\./i)
     ).toBeVisible();
   });
 
