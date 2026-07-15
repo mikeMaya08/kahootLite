@@ -362,4 +362,138 @@ test.describe('Quiz creator — duplicate question', () => {
     expect(stored[0].questions).toHaveLength(2);
     expect(stored[0].title).toBe('Hosted dup quiz');
   });
+
+  // ── Validation on duplicated blank question ────────────────────────────────
+
+  test('save is blocked when a duplicated question has no text', async ({
+    page,
+  }) => {
+    // Fill the first question with valid data so it passes validation.
+    await page.getByLabel('Quiz title').fill('Validation quiz');
+    await page.getByLabel('Question text').fill('Valid question?');
+    await page.getByPlaceholder('Option A').fill('Yes');
+    await page.getByPlaceholder('Option B').fill('No');
+
+    // Duplicate it — the clone starts with the same text.
+    await page.getByRole('button', { name: 'Duplicate question' }).click();
+
+    // Clear the text on the clone so it is blank.
+    await page
+      .locator('.question-editor')
+      .nth(1)
+      .getByLabel('Question text')
+      .fill('');
+
+    await page.getByRole('button', { name: 'Save quiz' }).click();
+
+    // Validation must fire for the blank cloned question (Question 2).
+    await expect(page.getByText(/Question 2 needs text/i)).toBeVisible();
+    // Must NOT navigate away.
+    await expect(page).not.toHaveURL(/#\/quizzes/);
+  });
+
+  test('save is blocked when a duplicated question has fewer than 2 options', async ({
+    page,
+  }) => {
+    await page.getByLabel('Quiz title').fill('Option validation quiz');
+    await page.getByLabel('Question text').fill('Original?');
+    await page.getByPlaceholder('Option A').fill('Only one');
+    // Leave options B–D empty on the original.
+
+    await page.getByRole('button', { name: 'Duplicate question' }).click();
+
+    // Both questions now have only one option filled — save should fail.
+    await page.getByRole('button', { name: 'Save quiz' }).click();
+
+    // Validation error for the first question that fails.
+    await expect(
+      page.getByText(/needs 2 or more choices/i)
+    ).toBeVisible();
+  });
+
+  // ── localStorage: cloned question gets a unique id ─────────────────────────
+
+  test('saved questions each have a distinct id in localStorage', async ({
+    page,
+  }) => {
+    await page.getByLabel('Quiz title').fill('ID uniqueness quiz');
+    await page.getByLabel('Question text').fill('Is this unique?');
+    await page.getByPlaceholder('Option A').fill('Yes');
+    await page.getByPlaceholder('Option B').fill('No');
+
+    await page.getByRole('button', { name: 'Duplicate question' }).click();
+
+    await page.getByRole('button', { name: 'Save quiz' }).click();
+    await expect(page).toHaveURL(/#\/quizzes/);
+
+    const stored = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem('kahootlite:quizzes') || '[]')
+    );
+    const ids = stored[0].questions.map((q) => q.id);
+    // The two question ids must be different strings.
+    expect(ids).toHaveLength(2);
+    expect(ids[0]).not.toBe(ids[1]);
+  });
+
+  // ── Preview after duplication ─────────────────────────────────────────────
+
+  test('Preview shows both questions after duplicating', async ({ page }) => {
+    await page.getByLabel('Quiz title').fill('Preview dup quiz');
+    await page.getByLabel('Question text').fill('Preview question?');
+    await page.getByPlaceholder('Option A').fill('Alpha');
+    await page.getByPlaceholder('Option B').fill('Beta');
+
+    await page.getByRole('button', { name: 'Duplicate question' }).click();
+    await expect(page.locator('.question-editor')).toHaveCount(2);
+
+    // Open the preview modal.
+    await page.getByRole('button', { name: /▶ Preview/ }).click();
+
+    // The preview should render content for both questions.
+    // At minimum the first question's text must appear inside the preview overlay.
+    await expect(page.getByText('Preview question?')).toBeVisible();
+  });
+
+  // ── Insertion position in a 3-question quiz ───────────────────────────────
+
+  test('duplicating a middle question inserts the clone right after it in a 3-question quiz', async ({
+    page,
+  }) => {
+    // Build a 3-question quiz manually.
+    await page.getByLabel('Question text').fill('Q1');
+    await page.getByRole('button', { name: /\+ Add question/ }).click();
+    await page
+      .locator('.question-editor')
+      .nth(1)
+      .getByLabel('Question text')
+      .fill('Q2');
+    await page.getByRole('button', { name: /\+ Add question/ }).click();
+    await page
+      .locator('.question-editor')
+      .nth(2)
+      .getByLabel('Question text')
+      .fill('Q3');
+
+    // Duplicate the MIDDLE question (index 1 = Q2).
+    await page
+      .locator('.question-editor')
+      .nth(1)
+      .getByRole('button', { name: 'Duplicate question' })
+      .click();
+
+    // Result should be: Q1, Q2, Q2 (clone), Q3.
+    await expect(page.locator('.question-editor')).toHaveCount(4);
+    await expect(
+      page.locator('.question-editor').nth(0).getByLabel('Question text')
+    ).toHaveValue('Q1');
+    await expect(
+      page.locator('.question-editor').nth(1).getByLabel('Question text')
+    ).toHaveValue('Q2');
+    await expect(
+      page.locator('.question-editor').nth(2).getByLabel('Question text')
+    ).toHaveValue('Q2');
+    await expect(
+      page.locator('.question-editor').nth(3).getByLabel('Question text')
+    ).toHaveValue('Q3');
+  });
 });
