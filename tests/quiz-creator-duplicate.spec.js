@@ -280,4 +280,86 @@ test.describe('Quiz creator — duplicate question', () => {
       page.locator('.question-editor').nth(0).getByLabel('Question text')
     ).toHaveValue('Keep me');
   });
+
+  // ── Edit mode ─────────────────────────────────────────────────────────────
+
+  test('duplicate button works when editing an existing saved quiz', async ({
+    page,
+  }) => {
+    // Seed an existing quiz into localStorage and navigate to its edit route.
+    const quiz = {
+      id: 'edit-dup-test',
+      title: 'Existing Quiz',
+      questions: [
+        {
+          id: 'q-1',
+          text: 'Existing question text',
+          options: ['Alpha', 'Beta', 'Gamma', 'Delta'],
+          correctIndex: 1,
+          timeLimit: 30,
+        },
+      ],
+      createdAt: 0,
+      updatedAt: 0,
+    };
+    await page.evaluate((q) => {
+      localStorage.setItem('kahootlite:quizzes', JSON.stringify([q]));
+    }, quiz);
+    await page.goto('/#/edit/edit-dup-test');
+
+    // Confirm the edit form is pre-filled before duplicating.
+    await expect(page.getByLabel('Quiz title')).toHaveValue('Existing Quiz');
+    await expect(page.locator('.question-editor')).toHaveCount(1);
+
+    // Duplicate the loaded question.
+    await page.getByRole('button', { name: 'Duplicate question' }).click();
+
+    await expect(page.locator('.question-editor')).toHaveCount(2);
+
+    // The clone must carry the same text and options as the original.
+    const clone = page.locator('.question-editor').nth(1);
+    await expect(clone.getByLabel('Question text')).toHaveValue(
+      'Existing question text'
+    );
+    await expect(clone.getByPlaceholder('Option A')).toHaveValue('Alpha');
+    await expect(clone.getByPlaceholder('Option B')).toHaveValue('Beta');
+    await expect(clone.getByLabel('Correct answer')).toHaveValue('1');
+
+    // Saving the edited quiz should now persist 2 questions.
+    await page.getByRole('button', { name: 'Save quiz' }).click();
+    await expect(page).toHaveURL(/#\/quizzes/);
+    await expect(page.getByText(/2 questions/i)).toBeVisible();
+  });
+
+  // ── Save & host after duplication ─────────────────────────────────────────
+
+  test('"Save & host" with a duplicated question opens the lobby with a valid PIN', async ({
+    page,
+  }) => {
+    // Fill a minimal but valid quiz with two questions (one duplicated).
+    await page.getByLabel('Quiz title').fill('Hosted dup quiz');
+    await page.getByLabel('Question text').fill('Host question?');
+    await page.getByPlaceholder('Option A').fill('Yes');
+    await page.getByPlaceholder('Option B').fill('No');
+
+    // Duplicate creates a second valid question (same options, same correct index).
+    await page.getByRole('button', { name: 'Duplicate question' }).click();
+    await expect(page.locator('.question-editor')).toHaveCount(2);
+
+    // "Save & host" should persist both questions and navigate to the lobby.
+    await page.getByRole('button', { name: /Save .* host/i }).click();
+    await page.waitForURL(/#\/host\//);
+
+    // The lobby must show a 6-character PIN.
+    const pin = (await page.locator('.big-code').first().innerText()).trim();
+    expect(pin).toMatch(/^[A-Z0-9]{6}$/);
+
+    // The saved quiz must contain 2 questions in localStorage.
+    const stored = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem('kahootlite:quizzes') || '[]')
+    );
+    expect(stored).toHaveLength(1);
+    expect(stored[0].questions).toHaveLength(2);
+    expect(stored[0].title).toBe('Hosted dup quiz');
+  });
 });
