@@ -17,7 +17,7 @@ test.describe('Quiz creator — Duplicate question', () => {
       page.getByRole('button', { name: 'Duplicate question' })
     ).toBeVisible();
     await expect(
-      page.queryByRole('button', { name: 'Remove question' })
+      page.getByRole('button', { name: 'Remove question' })
     ).toHaveCount(0);
   });
 
