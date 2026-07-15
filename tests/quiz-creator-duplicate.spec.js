@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { seedQuiz } from './helpers.js';
 
 // Tests for the "Duplicate question" button introduced in the quiz creator.
 // Each test is fully isolated — it navigates to /#/create and builds state
