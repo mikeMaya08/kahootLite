@@ -287,7 +287,7 @@ test.describe('Quiz creator — duplicate question', () => {
   test('duplicate button works when editing an existing saved quiz', async ({
     page,
   }) => {
-    // Seed an existing quiz into localStorage and navigate to its edit route.
+    // Seed an existing quiz using the shared helper, then navigate to its edit route.
     const quiz = {
       id: 'edit-dup-test',
       title: 'Existing Quiz',
@@ -303,9 +303,7 @@ test.describe('Quiz creator — duplicate question', () => {
       createdAt: 0,
       updatedAt: 0,
     };
-    await page.evaluate((q) => {
-      localStorage.setItem('kahootlite:quizzes', JSON.stringify([q]));
-    }, quiz);
+    await seedQuiz(page, quiz);
     await page.goto('/#/edit/edit-dup-test');
 
     // Confirm the edit form is pre-filled before duplicating.
