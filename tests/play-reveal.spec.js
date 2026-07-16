@@ -185,8 +185,8 @@ test.describe('Play screen – reveal & scoring details', () => {
     // Before anyone answers, the host shows 0 answers.
     await expect(page.locator('.game-header')).toContainText('Answers');
 
-    // Alice answers.
-    await alice.getByRole('button', { name: 'Paris' }).click();
+    // Alice answers (Paris = Option A).
+    await alice.getByRole('button', { name: /Option A: Paris/ }).click();
     await expect(alice.getByText(/Locked in/i)).toBeVisible();
 
     // The player screens show how many of the 2 have answered.
