@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { hostSeededQuiz, joinAs, seedQuiz } from './helpers.js';
+import { hostSeededQuiz, joinAs, seedQuiz } from './helpers';
 
 // A 2-question quiz for streak tests.
 const STREAK_QUIZ = {
