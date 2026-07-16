@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { hostSeededQuiz, joinAs, seedQuiz } from './helpers';
+import { hostSeededQuiz, joinAs, seedQuiz } from './helpers.js';
 
 function readEmojis(page, code) {
   return page.evaluate((roomKey) => {
