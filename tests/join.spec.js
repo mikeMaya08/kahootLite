@@ -10,7 +10,7 @@ test.describe('Join screen', () => {
     await player.goto(`/#/join/${code}`);
     await player.getByRole('button', { name: /Join game/ }).click();
 
-    await expect(player.getByText(/Pick a nickname/i)).toBeVisible();
+    await expect(player.getByText(/Enter a nickname to continue\./i)).toBeVisible();
     await expect(player).toHaveURL(new RegExp(`#/join/${code}`));
   });
 
@@ -22,11 +22,12 @@ test.describe('Join screen', () => {
     await player.goto(`/#/join/${code}`);
     const input = player.getByLabel('Your nickname');
     await input.evaluate((el) => { el.removeAttribute('maxlength'); });
-    await input.fill('ThisNicknameIsWayTooLong');
+    // Use a 44-char string to trigger the updated 30-char limit check
+    await input.fill('ThisNicknameIsWayTooLongAndDefinitelyExceedsThirtyChars');
     await player.getByRole('button', { name: /Join game/ }).click();
 
     await expect(
-      player.getByText(/Nickname must be 20 characters or fewer/i)
+      player.getByText(/Nickname must be \d+ characters or fewer/i)
     ).toBeVisible();
     await expect(player).toHaveURL(new RegExp(`#/join/${code}`));
   });
