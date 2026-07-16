@@ -39,8 +39,8 @@ test.describe('Play screen – reveal & scoring details', () => {
     await page.getByRole('button', { name: 'Start game' }).click();
     await expect(player.getByText('Capital of France?')).toBeVisible();
 
-    // Alice picks the wrong answer (Berlin = index 1, not index 0).
-    await player.getByRole('button', { name: 'Berlin' }).click();
+    // Alice picks the wrong answer (Berlin = index 1 / Option B, aria-label "Option B: Berlin").
+    await player.getByRole('button', { name: /Option B: Berlin/ }).click();
     await expect(player.getByText(/Locked in/i)).toBeVisible();
 
     // Host reveals.
