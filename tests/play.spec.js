@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { hostSeededQuiz, joinAs, seedQuiz } from './helpers';
+import { hostSeededQuiz, joinAs, seedQuiz } from './helpers.js';
 
 test.describe('Play screen', () => {
   test('shows "Out of time" when host reveals before player answers', async ({
