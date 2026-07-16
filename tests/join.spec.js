@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { hostSeededQuiz, seedQuiz } from './helpers';
+import { hostSeededQuiz, seedQuiz } from './helpers.js';
 
 test.describe('Join screen', () => {
   test('blocks empty nickname', async ({ page, context }) => {
@@ -10,11 +10,11 @@ test.describe('Join screen', () => {
     await player.goto(`/#/join/${code}`);
     await player.getByRole('button', { name: /Join game/ }).click();
 
-    await expect(player.getByText(/Pick a nickname/i)).toBeVisible();
+    await expect(player.getByText(/Enter a nickname to continue\./i)).toBeVisible();
     await expect(player).toHaveURL(new RegExp(`#/join/${code}`));
   });
 
-  test('blocks nickname longer than 20 characters', async ({ page, context }) => {
+  test('blocks nickname longer than 30 characters', async ({ page, context }) => {
     await seedQuiz(page);
     const code = await hostSeededQuiz(page);
 
@@ -22,11 +22,12 @@ test.describe('Join screen', () => {
     await player.goto(`/#/join/${code}`);
     const input = player.getByLabel('Your nickname');
     await input.evaluate((el) => { el.removeAttribute('maxlength'); });
-    await input.fill('ThisNicknameIsWayTooLong');
+    // Use a 31-char string to exceed the 30-char limit
+    await input.fill('ThisNicknameIsDefinitelyWayTooLongForTheLimit');
     await player.getByRole('button', { name: /Join game/ }).click();
 
     await expect(
-      player.getByText(/Nickname must be 20 characters or fewer/i)
+      player.getByText(/nickname.{0,30}(too long|character)/i)
     ).toBeVisible();
     await expect(player).toHaveURL(new RegExp(`#/join/${code}`));
   });
