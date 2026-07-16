@@ -49,13 +49,13 @@ test.describe('Play screen – reveal & scoring details', () => {
     // Alice should see "Not this time" (wrong-answer feedback).
     await expect(player.getByText(/Not this time/i)).toBeVisible();
 
-    // The correct option (Paris) must carry the `correct` state and the
-    // chosen wrong option (Berlin) must carry the `wrong` state.
-    // AnswerOption renders `data-state` on the button element.
-    const paris = player.getByRole('button', { name: 'Paris' });
-    const berlin = player.getByRole('button', { name: 'Berlin' });
-    await expect(paris).toHaveAttribute('data-state', 'correct');
-    await expect(berlin).toHaveAttribute('data-state', 'wrong');
+    // The correct option (Paris) must carry the `answer-correct` CSS class and
+    // the chosen wrong option (Berlin) must carry the `answer-wrong` class.
+    // AnswerOption applies these classes based on the `state` prop it receives.
+    const paris = player.getByRole('button', { name: /Option A: Paris/ });
+    const berlin = player.getByRole('button', { name: /Option B: Berlin/ });
+    await expect(paris).toHaveClass(/answer-correct/);
+    await expect(berlin).toHaveClass(/answer-wrong/);
   });
 
   test('correct answer is highlighted green and no wrong class on reveal', async ({
