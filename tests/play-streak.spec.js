@@ -142,7 +142,6 @@ test.describe('Play screen — streak & feedback', () => {
     context,
   }) => {
     await seedQuiz(page);
-    const { hostSeededQuiz } = await import('./helpers.js');
     const code = await hostSeededQuiz(page);
 
     const player = await context.newPage();
