@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { hostSeededQuiz, seedQuiz } from './helpers.js';
+import { hostSeededQuiz, seedQuiz } from './helpers';
 
 test.describe('Join screen – UX details', () => {
   test('player can select a custom emoji before joining', async ({
