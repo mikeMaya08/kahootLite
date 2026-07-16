@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { hostSeededQuiz, joinAs, seedQuiz } from './helpers';
+import { hostSeededQuiz, joinAs, seedQuiz } from './helpers.js';
 
 // Each test uses one BrowserContext with multiple Pages — same origin, same
 // localStorage, so the cross-tab `storage` event behaves exactly like real
