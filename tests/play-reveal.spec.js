@@ -107,17 +107,17 @@ test.describe('Play screen – reveal & scoring details', () => {
     await page.getByRole('button', { name: 'Start game' }).click();
     await expect(player.getByText('Capital of France?')).toBeVisible();
 
-    // Alice answers Q1 correctly.
-    await player.getByRole('button', { name: 'Paris' }).click();
+    // Alice answers Q1 correctly (Paris = Option A).
+    await player.getByRole('button', { name: /Option A: Paris/ }).click();
     await page.getByRole('button', { name: 'Reveal answer' }).click();
-    await expect(player.getByText(/✓ Correct!/i)).toBeVisible();
+    await expect(player.getByText(/Correct!/i)).toBeVisible();
 
     // Move to Q2.
     await page.getByRole('button', { name: 'Next question →' }).click();
     await expect(player.getByText('Capital of Germany?')).toBeVisible();
 
-    // Alice answers Q2 correctly (Berlin = index 1).
-    await player.getByRole('button', { name: 'Berlin' }).click();
+    // Alice answers Q2 correctly (Berlin = Option B in this question's options).
+    await player.getByRole('button', { name: /Option B: Berlin/ }).click();
     await page.getByRole('button', { name: 'Reveal answer' }).click();
 
     // After two consecutive correct answers the streak is 2 — the 🔥 badge
