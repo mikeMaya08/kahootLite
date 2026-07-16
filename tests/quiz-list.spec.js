@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { SAMPLE_QUIZ, seedQuiz } from './helpers';
+import { SAMPLE_QUIZ, seedQuiz } from './helpers.js';
 
 test.describe('Quiz library', () => {
   test('shows the empty state when no quizzes are saved', async ({ page }) => {
