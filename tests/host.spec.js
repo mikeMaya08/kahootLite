@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { hostSeededQuiz, joinAs, seedQuiz, SAMPLE_QUIZ } from './helpers.js';
+import { hostSeededQuiz, joinAs, seedQuiz, SAMPLE_QUIZ } from './helpers';
 
 // A multi-question quiz used by several tests below.
 const MULTI_QUIZ = {
