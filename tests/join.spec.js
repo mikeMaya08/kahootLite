@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { hostSeededQuiz, seedQuiz } from './helpers';
+import { hostSeededQuiz, seedQuiz } from './helpers.js';
 
 test.describe('Join screen', () => {
   test('blocks empty nickname', async ({ page, context }) => {
