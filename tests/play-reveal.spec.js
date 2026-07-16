@@ -71,18 +71,18 @@ test.describe('Play screen – reveal & scoring details', () => {
     await page.getByRole('button', { name: 'Start game' }).click();
     await expect(player.getByText('Capital of France?')).toBeVisible();
 
-    // Alice answers correctly (Paris).
-    await player.getByRole('button', { name: 'Paris' }).click();
+    // Alice answers correctly (Paris — aria-label is "Option A: Paris").
+    await player.getByRole('button', { name: /Option A: Paris/ }).click();
     await expect(player.getByText(/Locked in/i)).toBeVisible();
 
     await page.getByRole('button', { name: 'Reveal answer' }).click();
 
     // Alice sees the correct feedback.
-    await expect(player.getByText(/✓ Correct!/i)).toBeVisible();
-    await expect(player.getByRole('button', { name: 'Paris' })).toHaveAttribute(
-      'data-state',
-      'correct'
-    );
+    await expect(player.getByText(/Correct!/i)).toBeVisible();
+    // AnswerOption applies answer-correct CSS class on reveal — no data-state attribute.
+    await expect(
+      player.getByRole('button', { name: /Option A: Paris/ })
+    ).toHaveClass(/answer-correct/);
   });
 
   test('streak badge (🔥) appears after two consecutive correct answers', async ({
