@@ -116,7 +116,6 @@ test.describe('Play screen — streak & feedback', () => {
     context,
   }) => {
     await seedQuiz(page); // single-question Capital of France quiz
-    const { hostSeededQuiz } = await import('./helpers.js');
     const code = await hostSeededQuiz(page);
 
     const player = await context.newPage();
