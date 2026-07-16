@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { joinAs, seedQuiz } from './helpers.js';
+import { hostSeededQuiz, joinAs, seedQuiz } from './helpers.js';
 
 // ---------------------------------------------------------------------------
 // Three-question quiz: consecutive correct answers build a streak.
