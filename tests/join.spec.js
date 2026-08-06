@@ -10,7 +10,7 @@ test.describe('Join screen', () => {
     await player.goto(`/#/join/${code}`);
     await player.getByRole('button', { name: /Join game/ }).click();
 
-    await expect(player.getByText(/Pick a nickname/i)).toBeVisible();
+    await expect(player.getByText(/Enter a nickname to continue\./i)).toBeVisible();
     await expect(player).toHaveURL(new RegExp(`#/join/${code}`));
   });
 
@@ -22,7 +22,7 @@ test.describe('Join screen', () => {
     await player.goto(`/#/join/${code}`);
     const input = player.getByLabel('Your nickname');
     await input.evaluate((el) => { el.removeAttribute('maxlength'); });
-    await input.fill('ThisNicknameIsWayTooLong');
+    await input.fill('ThisNicknameIsDefinitelyWayTooLongForThisApp');
     await player.getByRole('button', { name: /Join game/ }).click();
 
     await expect(
