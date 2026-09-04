@@ -14,7 +14,7 @@ test.describe('CandyMapper - Contact Form', () => {
     }
   });
 
-  test('shows email validation error then succeeds on valid submission', async ({ page }) => {
+  test('shows email validation error then succeeds on valid submission', { tag: ['@contact', '@smoke', '@validation'] }, async ({ page }) => {
     const form = page.locator('[data-aid="CONTACT_FORM_CONTAINER_REND"]');
 
     // Type First Name, blur, then submit — should trigger email validation error
