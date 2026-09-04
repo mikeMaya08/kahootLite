@@ -7,7 +7,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: [['list'], ['html', { open: 'never' }],
-    ['./ControlHub/ControlHubReporter.ts']
+    ['@muuktest/amikoo-reporter']
   ],
   use: {
     video: 'on',
