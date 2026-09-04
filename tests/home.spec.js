@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Home screen', () => {
-  test('renders headline and primary CTAs', async ({ page }) => {
+  test('renders headline and primary CTAs', { tag: ['@home', '@smoke', '@ui'] }, async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     await expect(
@@ -16,7 +16,7 @@ test.describe('Home screen', () => {
     ).toBeVisible();
   });
 
-  test('Join button navigates to join screen with the typed PIN', async ({
+  test('Join button navigates to join screen with the typed PIN', { tag: ['@home', '@smoke'] }, async ({
     page,
   }) => {
     await page.goto('/');
@@ -26,15 +26,15 @@ test.describe('Home screen', () => {
     await expect(page).toHaveURL(/#\/join\/ABC123$/);
   });
 
-  test('shows "Room not found" when the PIN is invalid', async ({ page }) => {
+  test('shows "Room not found" when the PIN is invalid', { tag: ['@home', '@validation'] }, async ({ page }) => {
     await page.goto('/#/join/ZZZZZZ');
     await page.waitForLoadState('networkidle');
     await expect(page.getByText(/Room ZZZZZZ not found/i)).toBeVisible();
     await page.getByRole('button', { name: /← Home/ }).click();
-    await expect(page).toHaveURL(/\/?#?\/?$/);
+    await expect(page).toHaveURL(/\/?#?\/?)$/);
   });
 
-  test('theme toggle switches and persists across reload', async ({
+  test('theme toggle switches and persists across reload', { tag: ['@home', '@ui'] }, async ({
     page,
   }) => {
     await page.goto('/');
