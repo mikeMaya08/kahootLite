@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { hostSeededQuiz, seedQuiz } from './helpers';
 
 test.describe('Join screen', () => {
-  test('blocks empty nickname', async ({ page, context }) => {
+  test('blocks empty nickname', { tag: ['@join', '@smoke', '@validation'] }, async ({ page, context }) => {
     await seedQuiz(page);
     const code = await hostSeededQuiz(page);
 
@@ -14,7 +14,7 @@ test.describe('Join screen', () => {
     await expect(player).toHaveURL(new RegExp(`#/join/${code}`));
   });
 
-  test('blocks nickname longer than 20 characters', async ({ page, context }) => {
+  test('blocks nickname longer than 20 characters', { tag: ['@join', '@validation'] }, async ({ page, context }) => {
     await seedQuiz(page);
     const code = await hostSeededQuiz(page);
 
@@ -31,7 +31,7 @@ test.describe('Join screen', () => {
     await expect(player).toHaveURL(new RegExp(`#/join/${code}`));
   });
 
-  test('auto-redirects to /play when game is already in progress', async ({
+  test('auto-redirects to /play when game is already in progress', { tag: ['@join', '@smoke', '@e2e'] }, async ({
     page,
     context,
   }) => {
