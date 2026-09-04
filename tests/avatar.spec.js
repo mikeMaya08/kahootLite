@@ -9,7 +9,7 @@ function readEmojis(page, code) {
 }
 
 test.describe('Player avatar assignment', () => {
-  test('2 players always receive different avatars', async ({
+  test('2 players always receive different avatars', { tag: ['@avatar', '@ui'] }, async ({
     page,
     context,
   }) => {
@@ -25,7 +25,7 @@ test.describe('Player avatar assignment', () => {
     expect(emojis[0]).not.toBe(emojis[1]);
   });
 
-  test('3 players all receive different avatars', async ({
+  test('3 players all receive different avatars', { tag: ['@avatar', '@ui'] }, async ({
     page,
     context,
   }) => {
@@ -43,7 +43,7 @@ test.describe('Player avatar assignment', () => {
     expect(unique.size).toBe(emojis.length);
   });
 
-  test('4 players all receive different avatars', async ({
+  test('4 players all receive different avatars', { tag: ['@avatar', '@ui'] }, async ({
     page,
     context,
   }) => {
