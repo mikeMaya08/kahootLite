@@ -42,14 +42,14 @@ async function openPreview(page, { title = 'Preview Test Quiz', questions = 1 } 
 // Tests ------------------------------------------------------------------
 
 test.describe('Quiz preview modal', () => {
-  test('▶ Preview button is visible in the quiz creator', async ({ page }) => {
+  test('▶ Preview button is visible in the quiz creator', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     await page.goto('/#/create');
     await expect(
       page.getByRole('button', { name: '▶ Preview' })
     ).toBeVisible();
   });
 
-  test('opens the preview modal and shows Q 1 / N indicator', async ({ page }) => {
+  test('opens the preview modal and shows Q 1 / N indicator', { tag: ['@quiz-preview', '@smoke', '@ui'] }, async ({ page }) => {
     await openPreview(page);
 
     // Modal is open
@@ -62,7 +62,7 @@ test.describe('Quiz preview modal', () => {
     await expect(page.locator('.question-text')).toHaveText('What is 1 + 1?');
   });
 
-  test('✕ Close preview button dismisses the modal', async ({ page }) => {
+  test('✕ Close preview button dismisses the modal', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     await openPreview(page);
 
     await page.getByRole('button', { name: '✕ Close preview' }).click();
@@ -74,11 +74,10 @@ test.describe('Quiz preview modal', () => {
     await expect(page.getByRole('heading', { name: 'New quiz' })).toBeVisible();
   });
 
-  test('selecting the correct answer highlights it as correct', async ({ page }) => {
+  test('selecting the correct answer highlights it as correct', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     await openPreview(page);
 
     // Option A ('2') is the correct one (correctIndex = 0).
-    // AnswerOption renders buttons with class 'answer answer-{color}' — use button selector.
     await page.locator('.answers-grid button').nth(0).click();
 
     // The correct option should carry the 'answer-correct' class after reveal.
@@ -86,7 +85,7 @@ test.describe('Quiz preview modal', () => {
     await expect(correctOption).toHaveClass(/answer-correct/);
   });
 
-  test('selecting a wrong answer highlights it as wrong and reveals the correct one', async ({ page }) => {
+  test('selecting a wrong answer highlights it as wrong and reveals the correct one', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     await openPreview(page);
 
     // Click option B ('3') — the wrong answer (correctIndex = 0).
@@ -101,7 +100,7 @@ test.describe('Quiz preview modal', () => {
     await expect(correctOption).toHaveClass(/answer-correct/);
   });
 
-  test('cannot re-select an answer after answering (answered guard)', async ({ page }) => {
+  test('cannot re-select an answer after answering (answered guard)', { tag: ['@quiz-preview', '@validation'] }, async ({ page }) => {
     await openPreview(page);
 
     // First click selects answer B (wrong).
@@ -121,7 +120,7 @@ test.describe('Quiz preview modal', () => {
     await expect(optionB).toHaveClass(/answer-wrong/);
   });
 
-  test('single-question quiz shows "See results →" after answering', async ({ page }) => {
+  test('single-question quiz shows "See results →" after answering', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     await openPreview(page); // 1 question by default
 
     // Answer the only question.
@@ -133,7 +132,7 @@ test.describe('Quiz preview modal', () => {
     ).toBeVisible();
   });
 
-  test('multi-question quiz shows "Next question →" on all but the last question', async ({ page }) => {
+  test('multi-question quiz shows "Next question →" on all but the last question', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     await openPreview(page, { questions: 2 });
 
     // Answer question 1.
@@ -145,7 +144,7 @@ test.describe('Quiz preview modal', () => {
     ).toBeVisible();
   });
 
-  test('advancing through questions updates the Q N / total indicator', async ({ page }) => {
+  test('advancing through questions updates the Q N / total indicator', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     await openPreview(page, { questions: 2 });
 
     // Q 1 / 2
@@ -159,7 +158,7 @@ test.describe('Quiz preview modal', () => {
     await expect(page.locator('.preview-card .muted')).toHaveText('Q 2 / 2');
   });
 
-  test('last question of multi-question quiz shows "See results →"', async ({ page }) => {
+  test('last question of multi-question quiz shows "See results →"', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     await openPreview(page, { questions: 2 });
 
     // Answer Q1 and advance to Q2.
@@ -174,7 +173,7 @@ test.describe('Quiz preview modal', () => {
     ).toBeVisible();
   });
 
-  test('final results screen shows correct count and "Preview results" heading', async ({ page }) => {
+  test('final results screen shows correct count and "Preview results" heading', { tag: ['@quiz-preview', '@smoke'] }, async ({ page }) => {
     await openPreview(page, { questions: 2 });
 
     // Answer Q1 correctly (index 0 = correct) and advance.
@@ -191,7 +190,7 @@ test.describe('Quiz preview modal', () => {
     await expect(page.getByText('You got 1 / 2 correct')).toBeVisible();
   });
 
-  test('"Done" button on results screen closes the modal', async ({ page }) => {
+  test('"Done" button on results screen closes the modal', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     await openPreview(page); // 1 question
 
     // Answer and go to results.
@@ -208,7 +207,7 @@ test.describe('Quiz preview modal', () => {
     await expect(page.locator('.modal-overlay')).not.toBeVisible();
   });
 
-  test('preview reflects unsaved edits — reads live quiz state', async ({ page }) => {
+  test('preview reflects unsaved edits — reads live quiz state', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     // Start on the creator with unsaved content.
     await page.goto('/#/create');
     await page.getByLabel('Quiz title').fill('Live Edit Title');
@@ -228,7 +227,7 @@ test.describe('Quiz preview modal', () => {
     await expect(page.locator('.modal-overlay')).not.toBeVisible();
   });
 
-  test('question with no text renders "Untitled question" fallback', async ({ page }) => {
+  test('question with no text renders "Untitled question" fallback', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     // Navigate to the creator without filling in the question text, then open preview
     await page.goto('/#/create');
     await page.getByLabel('Quiz title').fill('Fallback Test');
@@ -243,7 +242,7 @@ test.describe('Quiz preview modal', () => {
     await expect(page.locator('.question-text')).toHaveText('Untitled question');
   });
 
-  test('preview state resets to Q1 when closed and reopened', async ({ page }) => {
+  test('preview state resets to Q1 when closed and reopened', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     await openPreview(page, { questions: 2 });
 
     // Answer Q1 and advance to Q2
@@ -263,7 +262,7 @@ test.describe('Quiz preview modal', () => {
     await expect(page.locator('.preview-card .muted')).toHaveText('Q 1 / 2');
   });
 
-  test('preview works on edit route with pre-seeded quiz data', async ({ page }) => {
+  test('preview works on edit route with pre-seeded quiz data', { tag: ['@quiz-preview', '@smoke', '@localstorage'] }, async ({ page }) => {
     // Seed a 2-question quiz directly into localStorage.
     const quiz = {
       id: 'quiz-preview-seed',
@@ -322,7 +321,7 @@ test.describe('Quiz preview modal', () => {
 
   // ── Additional gap-coverage tests ────────────────────────────────────────
 
-  test('empty question text renders "Untitled question" fallback', async ({ page }) => {
+  test('empty question text renders "Untitled question" fallback', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     // Navigate to create but do NOT fill question text.
     await page.goto('/#/create');
     await page.getByLabel('Quiz title').fill('Fallback Test');
@@ -337,7 +336,7 @@ test.describe('Quiz preview modal', () => {
     await expect(page.locator('.question-text')).toHaveText('Untitled question');
   });
 
-  test('all-correct answers produce a perfect score on the results screen', async ({ page }) => {
+  test('all-correct answers produce a perfect score on the results screen', { tag: ['@quiz-preview', '@validation'] }, async ({ page }) => {
     await openPreview(page, { questions: 2 });
 
     // Q1: answer correctly (index 0).
@@ -352,7 +351,7 @@ test.describe('Quiz preview modal', () => {
     await expect(page.getByText('You got 2 / 2 correct')).toBeVisible();
   });
 
-  test('all-wrong answers produce a zero score on the results screen', async ({ page }) => {
+  test('all-wrong answers produce a zero score on the results screen', { tag: ['@quiz-preview', '@validation'] }, async ({ page }) => {
     await openPreview(page, { questions: 2 });
 
     // Q1: answer wrong (index 1, correct is 0).
@@ -367,7 +366,7 @@ test.describe('Quiz preview modal', () => {
     await expect(page.getByText('You got 0 / 2 correct')).toBeVisible();
   });
 
-  test('answer options render the correct option text in the preview', async ({ page }) => {
+  test('answer options render the correct option text in the preview', { tag: ['@quiz-preview', '@ui', '@localstorage'] }, async ({ page }) => {
     // Seed a quiz with known option labels so we can assert the text is rendered.
     const quiz = {
       id: 'quiz-text-render',
