@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { SAMPLE_QUIZ, seedQuiz } from './helpers';
 
 test.describe('Quiz library', () => {
-  test('shows the empty state when no quizzes are saved', async ({ page }) => {
+  test('shows the empty state when no quizzes are saved', { tag: ['@quiz-library', '@ui'] }, async ({ page }) => {
     await page.goto('/#/quizzes');
     await expect(page.getByText(/No quizzes yet/i)).toBeVisible();
     await expect(
@@ -10,7 +10,7 @@ test.describe('Quiz library', () => {
     ).toBeVisible();
   });
 
-  test('lists saved quizzes', async ({ page }) => {
+  test('lists saved quizzes', { tag: ['@quiz-library', '@smoke', '@localstorage'] }, async ({ page }) => {
     await seedQuiz(page);
     await page.goto('/#/quizzes');
     await expect(
@@ -18,7 +18,7 @@ test.describe('Quiz library', () => {
     ).toBeVisible();
   });
 
-  test('Edit opens the creator pre-filled', async ({ page }) => {
+  test('Edit opens the creator pre-filled', { tag: ['@quiz-library', '@smoke'] }, async ({ page }) => {
     await seedQuiz(page);
     await page.goto('/#/quizzes');
     await page.getByRole('button', { name: 'Edit' }).click();
@@ -29,7 +29,7 @@ test.describe('Quiz library', () => {
     );
   });
 
-  test('Delete removes a quiz from the library', async ({ page }) => {
+  test('Delete removes a quiz from the library', { tag: ['@quiz-library', '@localstorage'] }, async ({ page }) => {
     await seedQuiz(page);
     await page.goto('/#/quizzes');
     page.on('dialog', (d) => d.accept());
@@ -37,7 +37,7 @@ test.describe('Quiz library', () => {
     await expect(page.getByText(/No quizzes yet/i)).toBeVisible();
   });
 
-  test('Host opens a lobby with players list and PIN', async ({ page }) => {
+  test('Host opens a lobby with players list and PIN', { tag: ['@quiz-library', '@smoke', '@e2e'] }, async ({ page }) => {
     await seedQuiz(page);
     await page.goto('/#/quizzes');
     await page.getByRole('button', { name: /Host →/ }).click();
