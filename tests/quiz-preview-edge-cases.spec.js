@@ -39,7 +39,7 @@ test.describe('Quiz preview — edge cases', () => {
   //    and the advance button are visible at the same time — closing must
   //    dismiss the modal without advancing.
   // -------------------------------------------------------------------------
-  test('✕ Close preview dismisses the modal even after an answer is selected', async ({ page }) => {
+  test('✕ Close preview dismisses the modal even after an answer is selected', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     const quiz = {
       id: 'quiz-close-mid-answered',
       title: 'Close After Answer Quiz',
@@ -80,7 +80,7 @@ test.describe('Quiz preview — edge cases', () => {
   });
 
 
-  test('shows "Untitled question" fallback when question text is empty', async ({ page }) => {
+  test('shows "Untitled question" fallback when question text is empty', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     // Seed a quiz with a question that has no text (empty string),
     // which hits the `current.text || 'Untitled question'` branch in QuizPreview.jsx.
     const quiz = {
@@ -105,7 +105,7 @@ test.describe('Quiz preview — edge cases', () => {
     await expect(page.locator('.question-text')).toHaveText('Untitled question');
   });
 
-  test('answering all questions wrong scores 0 / N correct on the results screen', async ({ page }) => {
+  test('answering all questions wrong scores 0 / N correct on the results screen', { tag: ['@quiz-preview', '@validation'] }, async ({ page }) => {
     // Seed a 2-question quiz where correctIndex is 0 ('Paris', 'Berlin').
     // We will pick index 1 for every question (wrong answer) and expect 0/2.
     const quiz = {
@@ -146,7 +146,7 @@ test.describe('Quiz preview — edge cases', () => {
     await expect(page.getByText('You got 0 / 2 correct')).toBeVisible();
   });
 
-  test('▶ Preview button is visible on the quiz edit route (/#/edit/:id)', async ({ page }) => {
+  test('▶ Preview button is visible on the quiz edit route (/#/edit/:id)', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     // The main spec verifies the button on /#/create; this confirms it also
     // appears when editing an existing quiz (editingId branch in QuizCreator.jsx).
     const quiz = {
