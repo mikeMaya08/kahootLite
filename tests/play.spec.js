@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { hostSeededQuiz, joinAs, seedQuiz } from './helpers';
 
 test.describe('Play screen', () => {
-  test('shows "Out of time" when host reveals before player answers', async ({
+  test('shows "Out of time" when host reveals before player answers', { tag: ['@play', '@ui'] }, async ({
     page,
     context,
   }) => {
@@ -23,7 +23,7 @@ test.describe('Play screen', () => {
     await expect(player.getByText(/Out of time/i)).toBeVisible();
   });
 
-  test('unanswered player scores zero after reveal', async ({
+  test('unanswered player scores zero after reveal', { tag: ['@play', '@validation'] }, async ({
     page,
     context,
   }) => {
@@ -44,7 +44,7 @@ test.describe('Play screen', () => {
     await expect(player.locator('.game-header')).toContainText('0 pts');
   });
 
-  test('shows "Game over" screen with rank and score after the game ends', async ({
+  test('shows "Game over" screen with rank and score after the game ends', { tag: ['@play', '@smoke', '@e2e'] }, async ({
     page,
     context,
   }) => {
