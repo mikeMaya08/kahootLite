@@ -6,7 +6,7 @@ import { hostSeededQuiz, joinAs, seedQuiz } from './helpers';
 // users running the app in two tabs of the same browser.
 
 test.describe('Multiplayer simulation', () => {
-  test('player join shows up live in the host lobby', async ({
+  test('player join shows up live in the host lobby', { tag: ['@multiplayer', '@smoke', '@e2e'] }, async ({
     page,
     context,
   }) => {
@@ -24,7 +24,7 @@ test.describe('Multiplayer simulation', () => {
     await expect(page.locator('.badge')).toHaveText('1');
   });
 
-  test('rejects a duplicate nickname in the same room', async ({
+  test('rejects a duplicate nickname in the same room', { tag: ['@multiplayer', '@validation'] }, async ({
     page,
     context,
   }) => {
@@ -45,7 +45,7 @@ test.describe('Multiplayer simulation', () => {
     ).toBeVisible();
   });
 
-  test('a second tab on the host URL becomes a spectator, not a controller', async ({
+  test('a second tab on the host URL becomes a spectator, not a controller', { tag: ['@multiplayer', '@ui'] }, async ({
     page,
     context,
   }) => {
@@ -62,7 +62,7 @@ test.describe('Multiplayer simulation', () => {
     ).toHaveCount(0);
   });
 
-  test('full game flow — join, answer, reveal, results sync across tabs', async ({
+  test('full game flow — join, answer, reveal, results sync across tabs', { tag: ['@multiplayer', '@smoke', '@e2e'] }, async ({
     page,
     context,
   }) => {
@@ -135,7 +135,7 @@ test.describe('Multiplayer simulation', () => {
     ).toBeVisible();
   });
 
-  test('answers cannot be changed once submitted', async ({
+  test('answers cannot be changed once submitted', { tag: ['@multiplayer', '@validation'] }, async ({
     page,
     context,
   }) => {
