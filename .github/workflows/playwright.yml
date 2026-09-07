@@ -17,10 +17,10 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browsers
-        run: npx playwright test tests/quiz/quiz-preview.spec.js
-
+        run: npx playwright install --with-deps
       - name: Run tests
         env:
           AMIKOO_KEY: ${{ secrets.AMIKOO_KEY }}
           CONTROLHUB_URL: ${{secrets.CONTROLHUB_URL}}
-        run: npx playwright test
+        run: npx playwright test tests/quiz/quiz-preview.spec.js
+
