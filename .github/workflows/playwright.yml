@@ -22,4 +22,5 @@ jobs:
       - name: Run tests
         env:
           AMIKOO_KEY: ${{ secrets.AMIKOO_KEY }}
+          CONTROLHUB_URL: ${{secrets.CONTROLHUB_URL}}
         run: npx playwright test
