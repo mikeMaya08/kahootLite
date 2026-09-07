@@ -17,7 +17,7 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+        run: npx playwright test tests/quiz/quiz-preview.spec.js
 
       - name: Run tests
         env:
