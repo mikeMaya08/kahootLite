@@ -28,6 +28,8 @@ export async function seedQuiz(page, quiz = SAMPLE_QUIZ) {
 // Drives a host page from quiz library to the live lobby and returns the PIN.
 export async function hostSeededQuiz(page) {
   await page.goto('/#/quizzes');
+  // Wait for the React app to fully hydrate before interacting with the quiz library.
+  await page.waitForLoadState('networkidle');
   await page.getByRole('button', { name: /Host →/ }).click();
   await page.waitForURL(/#\/host\//);
   const code = (await page.locator('.big-code').first().innerText()).trim();
