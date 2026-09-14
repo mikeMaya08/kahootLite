@@ -5,6 +5,9 @@ test.describe('Quiz creator — additional edge cases', () => {
     await page.goto('/');
     await page.evaluate(() => localStorage.removeItem('kahootlite:quizzes'));
     await page.goto('/#/create');
+    // Wait for full React hydration on the creator route.
+    await page.waitForLoadState('networkidle');
+    await page.getByLabel('Quiz title').waitFor({ state: 'visible', timeout: 15_000 });
   });
 
   // ── Validation: empty question text ───────────────────────────────────────
