@@ -6,6 +6,7 @@ test.describe('Quiz library — additional edge cases', () => {
 
   test('"+ New quiz" button in the library header navigates to the creator', async ({ page }) => {
     await page.goto('/#/quizzes');
+    await page.waitForLoadState('networkidle');
 
     await page.getByRole('button', { name: /\+ New quiz/ }).click();
 
@@ -16,6 +17,7 @@ test.describe('Quiz library — additional edge cases', () => {
     await page.goto('/');
     await page.evaluate(() => localStorage.removeItem('kahootlite:quizzes'));
     await page.goto('/#/quizzes');
+    await page.waitForLoadState('networkidle');
 
     await page.getByRole('button', { name: /Build your first quiz/i }).click();
 
