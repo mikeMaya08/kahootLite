@@ -4,6 +4,7 @@ import { SAMPLE_QUIZ, seedQuiz } from '../helpers';
 test.describe('Quiz library', () => {
   test('shows the empty state when no quizzes are saved', { tag: ['@quiz-library', '@ui'] }, async ({ page }) => {
     await page.goto('/#/quizzes');
+    await page.waitForLoadState('networkidle');
     await expect(page.getByText(/No quizzes yet/i)).toBeVisible();
     await expect(
       page.getByRole('button', { name: /Build your first quiz/i })
