@@ -3,6 +3,9 @@ import { test, expect } from '@playwright/test';
 test.describe('Quiz creator', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/#/create');
+    // Wait for full React hydration before interacting.
+    await page.waitForLoadState('networkidle');
+    await page.getByLabel('Quiz title').waitFor({ state: 'visible', timeout: 15_000 });
   });
 
   test('blocks save when title is empty', { tag: ['@quiz-creator', '@validation'] }, async ({ page }) => {
