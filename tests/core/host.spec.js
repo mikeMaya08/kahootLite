@@ -261,8 +261,13 @@ test.describe('Host page', () => {
     await expect(
       spectator.getByRole('button', { name: 'Start game' })
     ).toHaveCount(0);
+    // With no players in the lobby the Leaderboard component renders the empty
+    // state ("No players yet.") instead of the <ol class="leaderboard"> list.
+    // Assert that the leaderboard area is present in either form.
     await expect(
-      spectator.locator('.leaderboard, [class*="leaderboard"]').first()
+      spectator.locator('.leaderboard, [class*="leaderboard"]').or(
+        spectator.getByText(/No players yet/i)
+      ).first()
     ).toBeVisible();
   });
 });
