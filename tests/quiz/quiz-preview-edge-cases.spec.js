@@ -6,6 +6,9 @@ async function openPreviewOnEditRoute(page, quiz) {
     localStorage.setItem('kahootlite:quizzes', JSON.stringify([q]));
   }, quiz);
   await page.goto(`/#/edit/${quiz.id}`);
+  // Wait for React hydration on the edit route before clicking Preview.
+  await page.waitForLoadState('networkidle');
+  await page.getByRole('heading', { name: 'Edit quiz' }).waitFor({ state: 'visible', timeout: 15_000 });
   await page.getByRole('button', { name: '▶ Preview' }).click();
   await expect(page.locator('.modal-overlay')).toBeVisible();
 }
