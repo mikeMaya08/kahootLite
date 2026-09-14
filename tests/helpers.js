@@ -30,7 +30,11 @@ export async function hostSeededQuiz(page) {
   await page.goto('/#/quizzes');
   // Wait for the React app to fully hydrate before interacting with the quiz library.
   await page.waitForLoadState('networkidle');
-  await page.getByRole('button', { name: /Host →/ }).click();
+  // Also wait explicitly for the Host → button to be visible — networkidle alone
+  // may not be sufficient on cold Vercel deployments where React hydration lags.
+  const hostBtn = page.getByRole('button', { name: /Host →/ });
+  await hostBtn.waitFor({ state: 'visible', timeout: 15_000 });
+  await hostBtn.click();
   await page.waitForURL(/#\/host\//);
   const code = (await page.locator('.big-code').first().innerText()).trim();
   return code;
