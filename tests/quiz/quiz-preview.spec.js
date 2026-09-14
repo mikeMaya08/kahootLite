@@ -2,6 +2,9 @@ import { test, expect } from '@playwright/test';
 
 async function openPreview(page, { title = 'Preview Test Quiz', questions = 1 } = {}) {
   await page.goto('/#/create');
+  // Wait for React hydration before filling the form.
+  await page.waitForLoadState('networkidle');
+  await page.getByLabel('Quiz title').waitFor({ state: 'visible', timeout: 15_000 });
 
   await page.getByLabel('Quiz title').fill(title);
 
