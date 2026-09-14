@@ -26,6 +26,7 @@ test.describe('Quiz library — additional edge cases', () => {
 
   test('"← Home" button navigates back to home', async ({ page }) => {
     await page.goto('/#/quizzes');
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /← Home/i }).click();
     await expect(page).toHaveURL(/\/?#?\/?(|$)/);
   });
@@ -42,6 +43,7 @@ test.describe('Quiz library — additional edge cases', () => {
     }, [quiz1, quiz2]);
 
     await page.goto('/#/quizzes');
+    await page.waitForLoadState('networkidle');
 
     await expect(page.getByRole('heading', { name: 'Alpha Quiz' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Beta Quiz' })).toBeVisible();
@@ -52,6 +54,7 @@ test.describe('Quiz library — additional edge cases', () => {
   test('shows "1 question" (singular) for a single-question quiz', async ({ page }) => {
     await seedQuiz(page);
     await page.goto('/#/quizzes');
+    await page.waitForLoadState('networkidle');
 
     await expect(page.getByText(/1 question/i)).toBeVisible();
     await expect(page.getByText(/1 questions/i)).not.toBeVisible();
@@ -80,6 +83,7 @@ test.describe('Quiz library — additional edge cases', () => {
     }, multiQQuiz);
 
     await page.goto('/#/quizzes');
+    await page.waitForLoadState('networkidle');
 
     await expect(page.getByText(/2 questions/i)).toBeVisible();
   });
@@ -89,6 +93,7 @@ test.describe('Quiz library — additional edge cases', () => {
   test('dismissing the delete confirmation keeps the quiz in the list', async ({ page }) => {
     await seedQuiz(page);
     await page.goto('/#/quizzes');
+    await page.waitForLoadState('networkidle');
 
     page.on('dialog', (d) => d.dismiss());
     await page.getByRole('button', { name: 'Delete' }).click();
