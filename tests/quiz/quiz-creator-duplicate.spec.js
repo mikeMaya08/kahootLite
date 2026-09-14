@@ -11,6 +11,11 @@ test.describe('Quiz creator — duplicate question', () => {
     await page.goto('/');
     await page.evaluate(() => localStorage.removeItem('kahootlite:quizzes'));
     await page.goto('/#/create');
+    // Wait for full React hydration — Vercel cold starts can leave the component
+    // tree unrendered even after network-idle; waiting for a landmark element
+    // ensures the creator UI is interactive before any test action.
+    await page.waitForLoadState('networkidle');
+    await page.getByLabel('Quiz title').waitFor({ state: 'visible', timeout: 15_000 });
   });
 
   test('"Duplicate question" button is visible on the only question', { tag: ['@quiz-creator', '@ui'] }, async ({
