@@ -26,6 +26,7 @@ async function openPreview(page, { title = 'Preview Test Quiz', questions = 1 } 
 test.describe('Quiz preview modal', () => {
   test('▶ Preview button is visible in the quiz creator', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     await page.goto('/#/create');
+    await page.waitForLoadState('networkidle');
     await expect(
       page.getByRole('button', { name: '▶ Preview' })
     ).toBeVisible();
