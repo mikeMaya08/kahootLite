@@ -96,6 +96,8 @@ test.describe('Quiz library — additional edge cases', () => {
     await seedQuiz(page);
     await page.goto('/#/quizzes');
     await page.waitForLoadState('networkidle');
+    // Wait for Delete button to be interactive before registering dialog handler.
+    await page.getByRole('button', { name: 'Delete' }).waitFor({ state: 'visible', timeout: 15_000 });
 
     page.on('dialog', (d) => d.dismiss());
     await page.getByRole('button', { name: 'Delete' }).click();
