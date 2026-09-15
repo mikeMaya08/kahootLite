@@ -7,7 +7,8 @@ test.describe('Quiz library — additional edge cases', () => {
   test('"+ New quiz" button in the library header navigates to the creator', async ({ page }) => {
     await page.goto('/#/quizzes');
     await page.waitForLoadState('networkidle');
-
+    // Explicit element wait prevents click timeouts on cold Vercel deploys.
+    await page.getByRole('button', { name: /\+ New quiz/ }).waitFor({ state: 'visible', timeout: 15_000 });
     await page.getByRole('button', { name: /\+ New quiz/ }).click();
 
     await expect(page).toHaveURL(/#\/create/);
@@ -18,7 +19,7 @@ test.describe('Quiz library — additional edge cases', () => {
     await page.evaluate(() => localStorage.removeItem('kahootlite:quizzes'));
     await page.goto('/#/quizzes');
     await page.waitForLoadState('networkidle');
-
+    await page.getByRole('button', { name: /Build your first quiz/i }).waitFor({ state: 'visible', timeout: 15_000 });
     await page.getByRole('button', { name: /Build your first quiz/i }).click();
 
     await expect(page).toHaveURL(/#\/create/);
@@ -27,6 +28,7 @@ test.describe('Quiz library — additional edge cases', () => {
   test('"← Home" button navigates back to home', async ({ page }) => {
     await page.goto('/#/quizzes');
     await page.waitForLoadState('networkidle');
+    await page.getByRole('button', { name: /← Home/i }).waitFor({ state: 'visible', timeout: 15_000 });
     await page.getByRole('button', { name: /← Home/i }).click();
     await expect(page).toHaveURL(/\/?#?\/?(|$)/);
   });
