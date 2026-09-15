@@ -151,7 +151,9 @@ test.describe('Quiz preview modal', () => {
 
   test('preview state resets to Q1 when closed and reopened', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     await openPreview(page, { questions: 2 });
-    await page.locator('.answers-grid .answer-option').nth(0).click();
+    // Use '.answers-grid button' — the answer option selector used throughout
+    // this file; '.answer-option' class is not applied at the button level.
+    await page.locator('.answers-grid button').nth(0).click();
     await page.getByRole('button', { name: 'Next question →' }).click();
     await expect(page.locator('.preview-card .muted')).toHaveText('Q 2 / 2');
     await page.getByRole('button', { name: '✕ Close preview' }).click();
