@@ -39,6 +39,9 @@ test.describe('Quiz library', () => {
   test('Delete removes a quiz from the library', { tag: ['@quiz-library', '@localstorage'] }, async ({ page }) => {
     await seedQuiz(page);
     await page.goto('/#/quizzes');
+    await page.waitForLoadState('networkidle');
+    // Wait for Delete button before registering dialog handler.
+    await page.getByRole('button', { name: 'Delete' }).waitFor({ state: 'visible', timeout: 15_000 });
     page.on('dialog', (d) => d.accept());
     await page.getByRole('button', { name: 'Delete' }).click();
     await expect(page.getByText(/No quizzes yet/i)).toBeVisible();
@@ -47,6 +50,10 @@ test.describe('Quiz library', () => {
   test('Host opens a lobby with players list and PIN', { tag: ['@quiz-library', '@smoke', '@e2e'] }, async ({ page }) => {
     await seedQuiz(page);
     await page.goto('/#/quizzes');
+    await page.waitForLoadState('networkidle');
+    // Wait for Host → button to be visible before clicking — cold Vercel
+    // deployments can lag even after networkidle.
+    await page.getByRole('button', { name: /Host →/ }).waitFor({ state: 'visible', timeout: 15_000 });
     await page.getByRole('button', { name: /Host →/ }).click();
 
     await page.waitForURL(/#\/host\//);
