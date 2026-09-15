@@ -82,6 +82,9 @@ test.describe('Quiz preview — edge cases', () => {
       localStorage.setItem('kahootlite:quizzes', JSON.stringify([q]));
     }, quiz);
     await page.goto(`/#/edit/${quiz.id}`);
+    // Wait for React hydration on the edit route before asserting.
+    await page.waitForLoadState('networkidle');
+    await page.getByRole('heading', { name: 'Edit quiz' }).waitFor({ state: 'visible', timeout: 15_000 });
     await expect(page.getByRole('heading', { name: 'Edit quiz' })).toBeVisible();
     await expect(page.getByRole('button', { name: '▶ Preview' })).toBeVisible();
   });
