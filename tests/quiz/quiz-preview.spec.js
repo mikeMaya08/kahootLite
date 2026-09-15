@@ -27,6 +27,9 @@ test.describe('Quiz preview modal', () => {
   test('▶ Preview button is visible in the quiz creator', { tag: ['@quiz-preview', '@ui'] }, async ({ page }) => {
     await page.goto('/#/create');
     await page.waitForLoadState('networkidle');
+    // Explicit element wait before assertion; networkidle alone can be insufficient
+    // on cold Vercel deployments where React hydration lags behind the network.
+    await page.getByLabel('Quiz title').waitFor({ state: 'visible', timeout: 15_000 });
     await expect(
       page.getByRole('button', { name: '▶ Preview' })
     ).toBeVisible();
