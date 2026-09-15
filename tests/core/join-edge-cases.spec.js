@@ -11,8 +11,10 @@ test.describe('Join page edge cases', () => {
   test('shows "Room not found" when PIN does not match any room', async ({ page }) => {
     await page.goto('/#/join/XXXXXX');
     await page.waitForLoadState('networkidle');
+    // Wait for React to fully render the not-found state on cold deploys.
+    await page.getByRole('heading', { name: /Room XXXXXX not found/i }).waitFor({ state: 'visible', timeout: 10_000 });
 
-    await expect(page.getByText(/Room XXXXXX not found/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Room XXXXXX not found/i })).toBeVisible();
     await expect(
       page.getByRole('button', { name: /← Home/i })
     ).toBeVisible();
@@ -21,6 +23,8 @@ test.describe('Join page edge cases', () => {
   test('"← Home" on not-found screen returns to the home page', async ({ page }) => {
     await page.goto('/#/join/XXXXXX');
     await page.waitForLoadState('networkidle');
+    // Wait for the not-found screen button to be interactive before clicking.
+    await page.getByRole('button', { name: /← Home/i }).waitFor({ state: 'visible', timeout: 10_000 });
     await page.getByRole('button', { name: /← Home/i }).click();
     await expect(page).toHaveURL(/\/?#?[^/]*$/);
   });
