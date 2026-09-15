@@ -5,6 +5,8 @@ test.describe('Quiz library', () => {
   test('shows the empty state when no quizzes are saved', { tag: ['@quiz-library', '@ui'] }, async ({ page }) => {
     await page.goto('/#/quizzes');
     await page.waitForLoadState('networkidle');
+    // Explicit wait ensures the React component has rendered before assertion.
+    await page.getByText(/No quizzes yet/i).waitFor({ state: 'visible', timeout: 15_000 });
     await expect(page.getByText(/No quizzes yet/i)).toBeVisible();
     await expect(
       page.getByRole('button', { name: /Build your first quiz/i })
@@ -14,6 +16,7 @@ test.describe('Quiz library', () => {
   test('lists saved quizzes', { tag: ['@quiz-library', '@smoke', '@localstorage'] }, async ({ page }) => {
     await seedQuiz(page);
     await page.goto('/#/quizzes');
+    await page.waitForLoadState('networkidle');
     await expect(
       page.getByRole('heading', { name: SAMPLE_QUIZ.title })
     ).toBeVisible();
@@ -22,6 +25,9 @@ test.describe('Quiz library', () => {
   test('Edit opens the creator pre-filled', { tag: ['@quiz-library', '@smoke'] }, async ({ page }) => {
     await seedQuiz(page);
     await page.goto('/#/quizzes');
+    await page.waitForLoadState('networkidle');
+    // Wait for the Edit button to be interactive before clicking.
+    await page.getByRole('button', { name: 'Edit' }).waitFor({ state: 'visible', timeout: 15_000 });
     await page.getByRole('button', { name: 'Edit' }).click();
     await expect(page).toHaveURL(/#\/edit\//);
     await expect(page.getByLabel('Quiz title')).toHaveValue(SAMPLE_QUIZ.title);
