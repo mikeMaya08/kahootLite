@@ -58,7 +58,7 @@ test.describe('Quiz library — additional edge cases', () => {
     await seedQuiz(page);
     await page.goto('/#/quizzes');
     await page.waitForLoadState('networkidle');
-
+    await page.getByText(/1 question/i).waitFor({ state: 'visible', timeout: 15_000 });
     await expect(page.getByText(/1 question/i)).toBeVisible();
     await expect(page.getByText(/1 questions/i)).not.toBeVisible();
   });
