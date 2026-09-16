@@ -59,9 +59,11 @@ test.describe('Quiz preview — edge cases', () => {
       updatedAt: 0,
     };
     await openPreviewOnEditRoute(page, quiz);
-    await page.locator('.answers-grid .answer-option').nth(1).click();
+    // Use .answers-grid button (rendered by AnswerOption) instead of .answer-option
+    // class which does not exist; the component renders <button> elements directly.
+    await page.locator('.answers-grid button').nth(1).click();
     await page.getByRole('button', { name: 'Next question →' }).click();
-    await page.locator('.answers-grid .answer-option').nth(0).click();
+    await page.locator('.answers-grid button').nth(0).click();
     await page.getByRole('button', { name: 'See results →' }).click();
     await expect(page.getByRole('heading', { name: 'Preview results' })).toBeVisible();
     await expect(page.getByText('You got 0 / 2 correct')).toBeVisible();
