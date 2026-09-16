@@ -17,6 +17,8 @@ test.describe('Quiz library', () => {
     await seedQuiz(page);
     await page.goto('/#/quizzes');
     await page.waitForLoadState('networkidle');
+    // Explicit waitFor protects against cold Vercel hydration lag.
+    await page.getByRole('heading', { name: SAMPLE_QUIZ.title }).waitFor({ state: 'visible', timeout: 15_000 });
     await expect(
       page.getByRole('heading', { name: SAMPLE_QUIZ.title })
     ).toBeVisible();
