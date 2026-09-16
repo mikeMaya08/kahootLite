@@ -242,10 +242,13 @@ test.describe('Quiz preview modal', () => {
     await page.getByRole('heading', { name: 'Edit quiz' }).waitFor({ state: 'visible', timeout: 15_000 });
     await page.getByRole('button', { name: '▶ Preview' }).click();
     await expect(page.locator('.modal-overlay')).toBeVisible();
-    await expect(page.getByText('Red')).toBeVisible();
-    await expect(page.getByText('Green')).toBeVisible();
-    await expect(page.getByText('Blue')).toBeVisible();
-    await expect(page.getByText('Yellow')).toBeVisible();
+    // Scope text assertions to the answers grid to avoid strict-mode violations
+    // caused by the same option text also appearing in the "Correct answer" <select>.
+    const grid = page.locator('.answers-grid');
+    await expect(grid.getByText('Red')).toBeVisible();
+    await expect(grid.getByText('Green')).toBeVisible();
+    await expect(grid.getByText('Blue')).toBeVisible();
+    await expect(grid.getByText('Yellow')).toBeVisible();
     await page.locator('.answers-grid button').nth(2).click();
     await expect(page.locator('.answers-grid button').nth(2)).toHaveClass(/answer-correct/);
   });
