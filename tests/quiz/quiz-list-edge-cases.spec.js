@@ -46,7 +46,8 @@ test.describe('Quiz library — additional edge cases', () => {
 
     await page.goto('/#/quizzes');
     await page.waitForLoadState('networkidle');
-
+    // Explicit waits guard against cold-start Vercel hydration lag.
+    await page.getByRole('heading', { name: 'Alpha Quiz' }).waitFor({ state: 'visible', timeout: 15_000 });
     await expect(page.getByRole('heading', { name: 'Alpha Quiz' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Beta Quiz' })).toBeVisible();
   });
