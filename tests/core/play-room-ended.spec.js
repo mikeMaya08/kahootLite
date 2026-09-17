@@ -129,7 +129,11 @@ test.describe('Play page edge cases', () => {
       localStorage.setItem('kahootlite:quizzes', JSON.stringify([q]));
     }, twoQ);
     await page.goto('/#/quizzes');
-    await page.getByRole('button', { name: /Host →/ }).click();
+    await page.waitForLoadState('networkidle');
+    // Wait explicitly for the Host → button — cold Vercel deploys can lag beyond networkidle.
+    const hostBtn = page.getByRole('button', { name: /Host →/ });
+    await hostBtn.waitFor({ state: 'visible', timeout: 15_000 });
+    await hostBtn.click();
     await page.waitForURL(/#\/host\//);
     const code = (await page.locator('.big-code').first().innerText()).trim();
 
