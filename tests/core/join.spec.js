@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { hostSeededQuiz, seedQuiz } from '../helpers';
+import { hostSeededQuiz, seedQuiz, setBypassHeader } from '../helpers';
 
 test.describe('Join screen', () => {
   test('blocks empty nickname', { tag: ['@join', '@smoke', '@validation'] }, async ({ page, context }) => {
