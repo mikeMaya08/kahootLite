@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { seedQuiz } from '../helpers.js';
+import { seedQuiz, setBypassHeader } from '../helpers.js';
 
 // Tests for the "Duplicate question" button introduced in the quiz creator.
 // Each test is fully isolated — it navigates to /#/create and builds state
@@ -8,6 +8,8 @@ import { seedQuiz } from '../helpers.js';
 
 test.describe('Quiz creator — duplicate question', () => {
   test.beforeEach(async ({ page }) => {
+    // Bypass Vercel bot-protection so the headless browser reaches the app.
+    await setBypassHeader(page);
     await page.goto('/');
     await page.evaluate(() => localStorage.removeItem('kahootlite:quizzes'));
     await page.goto('/#/create');
@@ -15,10 +17,10 @@ test.describe('Quiz creator — duplicate question', () => {
     // tree unrendered even after network-idle; waiting for a landmark element
     // ensures the creator UI is interactive before any test action.
     await page.waitForLoadState('networkidle');
-    await page.getByLabel('Quiz title').waitFor({ state: 'visible', timeout: 15_000 });
+    await page.getByLabel('Quiz title').waitFor({ state: 'visible', timeout: 30_000 });
   });
 
-  test('"Duplicate question" button is visible on the only question', { tag: ['@quiz-creator', '@ui'] }, async ({
+  test('should show the Duplicate question button on the only question', { tag: ['@quiz-creator', '@ui'] }, async ({
     page,
   }) => {
     await expect(
@@ -29,7 +31,7 @@ test.describe('Quiz creator — duplicate question', () => {
     ).toBeHidden();
   });
 
-  test('"Duplicate question" button is visible alongside "Remove question" when multiple questions exist', { tag: ['@quiz-creator', '@ui'] }, async ({
+  test('should show Duplicate question alongside Remove question when multiple questions exist', { tag: ['@quiz-creator', '@ui'] }, async ({
     page,
   }) => {
     await page.getByRole('button', { name: /\+ Add question/ }).click();
@@ -43,7 +45,7 @@ test.describe('Quiz creator — duplicate question', () => {
     ).toHaveCount(2);
   });
 
-  test('clicking "Duplicate question" increases the question count by one', { tag: ['@quiz-creator', '@ui'] }, async ({
+  test('should increase the question count by one when clicking Duplicate question', { tag: ['@quiz-creator', '@ui'] }, async ({
     page,
   }) => {
     await expect(page.locator('.question-editor')).toHaveCount(1);
@@ -51,7 +53,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(page.locator('.question-editor')).toHaveCount(2);
   });
 
-  test('duplicate copies question text into the new question', { tag: ['@quiz-creator'] }, async ({
+  test('should copy question text into the new question when duplicating', { tag: ['@quiz-creator'] }, async ({
     page,
   }) => {
     const questionText = 'What is the capital of France?';
@@ -63,7 +65,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(editors.nth(1).getByLabel('Question text')).toHaveValue(questionText);
   });
 
-  test('duplicate copies all four answer options into the new question', { tag: ['@quiz-creator'] }, async ({
+  test('should copy all four answer options into the new question when duplicating', { tag: ['@quiz-creator'] }, async ({
     page,
   }) => {
     await page.getByPlaceholder('Option A').fill('Paris');
@@ -80,7 +82,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(clone.getByPlaceholder('Option D')).toHaveValue('Rome');
   });
 
-  test('duplicate preserves the correct-answer selection', { tag: ['@quiz-creator'] }, async ({ page }) => {
+  test('should preserve the correct-answer selection when duplicating', { tag: ['@quiz-creator'] }, async ({ page }) => {
     await page.getByPlaceholder('Option A').fill('Paris');
     await page.getByPlaceholder('Option B').fill('Berlin');
     await page.getByLabel('Correct answer').selectOption({ index: 1 });
@@ -90,7 +92,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(cloneSelect).toHaveValue('1');
   });
 
-  test('duplicate preserves the time limit', { tag: ['@quiz-creator'] }, async ({ page }) => {
+  test('should preserve the time limit when duplicating', { tag: ['@quiz-creator'] }, async ({ page }) => {
     const timeLimitInput = page.locator('.question-editor').nth(0).getByLabel('Time limit (seconds)');
     await timeLimitInput.fill('45');
     await timeLimitInput.blur();
@@ -101,7 +103,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(cloneTimeLimitInput).toHaveValue('45');
   });
 
-  test('duplicated question is inserted immediately after the source', { tag: ['@quiz-creator'] }, async ({
+  test('should insert the duplicated question immediately after the source', { tag: ['@quiz-creator'] }, async ({
     page,
   }) => {
     await page.getByLabel('Question text').fill('First question');
@@ -115,7 +117,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(page.locator('.question-editor').nth(2).getByLabel('Question text')).toHaveValue('Second question');
   });
 
-  test('duplicating the last question appends the clone at the end', { tag: ['@quiz-creator'] }, async ({
+  test('should append the clone at the end when duplicating the last question', { tag: ['@quiz-creator'] }, async ({
     page,
   }) => {
     await page.getByLabel('Question text').fill('Only question');
@@ -125,7 +127,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(page.locator('.question-editor').nth(1).getByLabel('Question text')).toHaveValue('Only question');
   });
 
-  test('duplicated question receives a unique id (edits do not affect the original)', { tag: ['@quiz-creator'] }, async ({
+  test('should give the duplicated question a unique id so edits do not affect the original', { tag: ['@quiz-creator'] }, async ({
     page,
   }) => {
     await page.getByLabel('Question text').fill('Original text');
@@ -140,7 +142,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(page.locator('.question-editor').nth(1).getByLabel('Question text')).toHaveValue('Modified clone text');
   });
 
-  test('modifying original options after duplication does not affect the clone', { tag: ['@quiz-creator'] }, async ({
+  test('should not affect the clone when modifying original options after duplication', { tag: ['@quiz-creator'] }, async ({
     page,
   }) => {
     await page.getByPlaceholder('Option A').fill('Shared value');
@@ -153,7 +155,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(page.locator('.question-editor').nth(1).getByPlaceholder('Option A')).toHaveValue('Shared value');
   });
 
-  test('can duplicate the same question multiple times, building a longer list', { tag: ['@quiz-creator'] }, async ({
+  test('should allow duplicating the same question multiple times, building a longer list', { tag: ['@quiz-creator'] }, async ({
     page,
   }) => {
     await page.getByLabel('Question text').fill('Repeated question');
@@ -164,7 +166,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(page.locator('.question-editor')).toHaveCount(3);
   });
 
-  test('a quiz with a duplicated question saves successfully', { tag: ['@quiz-creator', '@smoke', '@localstorage'] }, async ({
+  test('should save successfully a quiz with a duplicated question', { tag: ['@quiz-creator', '@smoke', '@localstorage'] }, async ({
     page,
   }) => {
     await page.getByLabel('Quiz title').fill('Dup quiz');
@@ -181,7 +183,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(page.getByText(/2 questions/i)).toBeVisible();
   });
 
-  test('duplicated question can be removed independently', { tag: ['@quiz-creator'] }, async ({ page }) => {
+  test('should remove a duplicated question independently', { tag: ['@quiz-creator'] }, async ({ page }) => {
     await page.getByLabel('Question text').fill('Keep me');
     await page.getByRole('button', { name: 'Duplicate question' }).click();
 
@@ -193,7 +195,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(page.locator('.question-editor').nth(0).getByLabel('Question text')).toHaveValue('Keep me');
   });
 
-  test('duplicate button works when editing an existing saved quiz', { tag: ['@quiz-creator', '@localstorage'] }, async ({
+  test('should work the duplicate button when editing an existing saved quiz', { tag: ['@quiz-creator', '@localstorage'] }, async ({
     page,
   }) => {
     const quiz = {
@@ -231,7 +233,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(page.getByText(/2 questions/i)).toBeVisible();
   });
 
-  test('duplicating a middle question inserts the clone between its neighbours', { tag: ['@quiz-creator'] }, async ({
+  test('should insert the clone between its neighbours when duplicating a middle question', { tag: ['@quiz-creator'] }, async ({
     page,
   }) => {
     await page.getByLabel('Question text').fill('Question A');
@@ -249,7 +251,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(page.locator('.question-editor').nth(3).getByLabel('Question text')).toHaveValue('Question C');
   });
 
-  test('save is blocked when a cloned question has its text cleared', { tag: ['@quiz-creator', '@validation'] }, async ({
+  test('should block save when a cloned question has its text cleared', { tag: ['@quiz-creator', '@validation'] }, async ({
     page,
   }) => {
     await page.getByLabel('Quiz title').fill('Validation after dup');
@@ -267,7 +269,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(page).toHaveURL(/#\/create/);
   });
 
-  test('"Save & host" with a duplicated question opens the lobby with a valid PIN', { tag: ['@quiz-creator', '@smoke', '@e2e', '@localstorage'] }, async ({
+  test('should open the lobby with a valid PIN when using Save & host with a duplicated question', { tag: ['@quiz-creator', '@smoke', '@e2e', '@localstorage'] }, async ({
     page,
   }) => {
     await page.getByLabel('Quiz title').fill('Hosted dup quiz');
@@ -292,7 +294,7 @@ test.describe('Quiz creator — duplicate question', () => {
     expect(stored[0].title).toBe('Hosted dup quiz');
   });
 
-  test('save is blocked when a duplicated question has no text', { tag: ['@quiz-creator', '@validation'] }, async ({
+  test('should block save when a duplicated question has no text', { tag: ['@quiz-creator', '@validation'] }, async ({
     page,
   }) => {
     await page.getByLabel('Quiz title').fill('Validation quiz');
@@ -310,7 +312,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(page).not.toHaveURL(/#\/quizzes/);
   });
 
-  test('save is blocked when a duplicated question has fewer than 2 options', { tag: ['@quiz-creator', '@validation'] }, async ({
+  test('should block save when a duplicated question has fewer than 2 options', { tag: ['@quiz-creator', '@validation'] }, async ({
     page,
   }) => {
     await page.getByLabel('Quiz title').fill('Option validation quiz');
@@ -324,7 +326,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(page.getByText(/needs 2 or more choices/i)).toBeVisible();
   });
 
-  test('saved questions each have a distinct id in localStorage', { tag: ['@quiz-creator', '@localstorage'] }, async ({
+  test('should give saved questions distinct ids in localStorage', { tag: ['@quiz-creator', '@localstorage'] }, async ({
     page,
   }) => {
     await page.getByLabel('Quiz title').fill('ID uniqueness quiz');
@@ -345,7 +347,7 @@ test.describe('Quiz creator — duplicate question', () => {
     expect(ids[0]).not.toBe(ids[1]);
   });
 
-  test('Preview shows both questions after duplicating', { tag: ['@quiz-creator', '@quiz-preview'] }, async ({ page }) => {
+  test('should show both questions in Preview after duplicating', { tag: ['@quiz-creator', '@quiz-preview'] }, async ({ page }) => {
     await page.getByLabel('Quiz title').fill('Preview dup quiz');
     await page.getByLabel('Question text').fill('Preview question?');
     await page.getByPlaceholder('Option A').fill('Alpha');
@@ -359,7 +361,7 @@ test.describe('Quiz creator — duplicate question', () => {
     await expect(page.getByText('Preview question?')).toBeVisible();
   });
 
-  test('duplicating a middle question inserts the clone right after it in a 3-question quiz', { tag: ['@quiz-creator'] }, async ({
+  test('should insert the clone right after the middle question in a 3-question quiz', { tag: ['@quiz-creator'] }, async ({
     page,
   }) => {
     await page.getByLabel('Question text').fill('Q1');

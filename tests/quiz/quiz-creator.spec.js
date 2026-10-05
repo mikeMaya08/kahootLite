@@ -1,19 +1,22 @@
 import { test, expect } from '@playwright/test';
+import { setBypassHeader } from '../helpers.js';
 
 test.describe('Quiz creator', () => {
   test.beforeEach(async ({ page }) => {
+    // Bypass Vercel bot-protection so the headless browser reaches the app.
+    await setBypassHeader(page);
     await page.goto('/#/create');
     // Wait for full React hydration before interacting.
     await page.waitForLoadState('networkidle');
-    await page.getByLabel('Quiz title').waitFor({ state: 'visible', timeout: 15_000 });
+    await page.getByLabel('Quiz title').waitFor({ state: 'visible', timeout: 30_000 });
   });
 
-  test('blocks save when title is empty', { tag: ['@quiz-creator', '@validation'] }, async ({ page }) => {
+  test('should block save when title is empty', { tag: ['@quiz-creator', '@validation'] }, async ({ page }) => {
     await page.getByRole('button', { name: 'Save quiz' }).click();
     await expect(page.getByText(/Please add a title\./i)).toBeVisible();
   });
 
-  test('blocks save when fewer than 2 options are filled', { tag: ['@quiz-creator', '@validation'] }, async ({
+  test('should block save when fewer than 2 options are filled', { tag: ['@quiz-creator', '@validation'] }, async ({
     page,
   }) => {
     await page.getByLabel('Quiz title').fill('Half-built');
@@ -25,7 +28,7 @@ test.describe('Quiz creator', () => {
     ).toBeVisible();
   });
 
-  test('saves a complete quiz and lands in the library', { tag: ['@quiz-creator', '@smoke', '@localstorage'] }, async ({ page }) => {
+  test('should save a complete quiz and land in the library', { tag: ['@quiz-creator', '@smoke', '@localstorage'] }, async ({ page }) => {
     await page.getByLabel('Quiz title').fill('Capitals');
     await page.getByLabel('Question text').fill('Capital of France?');
     await page.getByPlaceholder('Option A').fill('Paris');
@@ -40,7 +43,7 @@ test.describe('Quiz creator', () => {
     await expect(page.getByText(/1 question/i)).toBeVisible();
   });
 
-  test('add and remove question controls work', { tag: ['@quiz-creator', '@ui'] }, async ({ page }) => {
+  test('should add and remove question controls work', { tag: ['@quiz-creator', '@ui'] }, async ({ page }) => {
     await expect(page.locator('.question-editor')).toHaveCount(1);
 
     await page.getByRole('button', { name: /\+ Add question/ }).click();
@@ -53,7 +56,7 @@ test.describe('Quiz creator', () => {
     await expect(page.locator('.question-editor')).toHaveCount(1);
   });
 
-  test('"Save & host" persists the quiz and opens a fresh lobby with a 6-char PIN', { tag: ['@quiz-creator', '@smoke', '@e2e', '@localstorage'] }, async ({
+  test('should persist the quiz and open a fresh lobby with a 6-char PIN when using Save & host', { tag: ['@quiz-creator', '@smoke', '@e2e', '@localstorage'] }, async ({
     page,
   }) => {
     await page.getByLabel('Quiz title').fill('Snap quiz');
@@ -74,7 +77,7 @@ test.describe('Quiz creator', () => {
     expect(stored[0].title).toBe('Snap quiz');
   });
 
-  test('blocks save when correct answer points to an empty option', { tag: ['@quiz-creator', '@validation'] }, async ({
+  test('should block save when correct answer points to an empty option', { tag: ['@quiz-creator', '@validation'] }, async ({
     page,
   }) => {
     await page.getByLabel('Quiz title').fill('Bad quiz');
@@ -90,7 +93,7 @@ test.describe('Quiz creator', () => {
     ).toBeVisible();
   });
 
-  test('edit route pre-fills the form with existing quiz data', { tag: ['@quiz-creator', '@smoke', '@localstorage'] }, async ({
+  test('should pre-fill the form with existing quiz data on the edit route', { tag: ['@quiz-creator', '@smoke', '@localstorage'] }, async ({
     page,
   }) => {
     const quiz = {
