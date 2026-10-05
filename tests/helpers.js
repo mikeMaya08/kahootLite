@@ -17,7 +17,7 @@
 export async function setBypassHeader(page) {
   const secret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
   if (secret) {
-    await page.setExtraHTTPHeaders({
+    await page.context().setExtraHTTPHeaders({
       'x-vercel-protection-bypass': secret,
       'x-vercel-set-bypass-cookie': 'samesitenone',
     });
