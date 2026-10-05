@@ -7,6 +7,7 @@ test.describe('Join screen', () => {
     const code = await hostSeededQuiz(page);
 
     const player = await context.newPage();
+    await setBypassHeader(player);
     await player.goto(`/#/join/${code}`);
     await player.getByRole('button', { name: /Join game/ }).click();
 
@@ -19,6 +20,7 @@ test.describe('Join screen', () => {
     const code = await hostSeededQuiz(page);
 
     const player = await context.newPage();
+    await setBypassHeader(player);
     await player.goto(`/#/join/${code}`);
     const input = player.getByLabel('Your nickname');
     await input.evaluate((el) => { el.removeAttribute('maxlength'); });
