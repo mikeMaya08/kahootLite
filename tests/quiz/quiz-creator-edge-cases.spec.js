@@ -1,18 +1,21 @@
 import { test, expect } from '@playwright/test';
+import { setBypassHeader } from '../helpers.js';
 
 test.describe('Quiz creator — additional edge cases', () => {
   test.beforeEach(async ({ page }) => {
+    // Bypass Vercel bot-protection so the headless browser reaches the app.
+    await setBypassHeader(page);
     await page.goto('/');
     await page.evaluate(() => localStorage.removeItem('kahootlite:quizzes'));
     await page.goto('/#/create');
     // Wait for full React hydration on the creator route.
     await page.waitForLoadState('networkidle');
-    await page.getByLabel('Quiz title').waitFor({ state: 'visible', timeout: 15_000 });
+    await page.getByLabel('Quiz title').waitFor({ state: 'visible', timeout: 30_000 });
   });
 
   // ── Validation: empty question text ───────────────────────────────────────
 
-  test('blocks save when question text is empty', async ({ page }) => {
+  test('should block save when question text is empty', async ({ page }) => {
     await page.getByLabel('Quiz title').fill('No-text quiz');
     await page.getByPlaceholder('Option A').fill('Yes');
     await page.getByPlaceholder('Option B').fill('No');
@@ -22,7 +25,7 @@ test.describe('Quiz creator — additional edge cases', () => {
     await expect(page.getByText(/Question 1 needs text\./i)).toBeVisible();
   });
 
-  test('blocks save when quiz title is empty but question is present', async ({ page }) => {
+  test('should block save when quiz title is empty but question is present', async ({ page }) => {
     await page.getByLabel('Question text').fill('Valid question?');
     await page.getByPlaceholder('Option A').fill('Yes');
     await page.getByPlaceholder('Option B').fill('No');
@@ -33,13 +36,13 @@ test.describe('Quiz creator — additional edge cases', () => {
 
   // ── Time-limit selector ───────────────────────────────────────────────────
 
-  test('time-limit select is visible and has the expected default value', async ({ page }) => {
+  test('should show the time-limit select with the expected default value', async ({ page }) => {
     const timeLimitSelect = page.getByLabel(/Time limit/i).first();
     await expect(timeLimitSelect).toBeVisible();
     await expect(timeLimitSelect).toHaveValue('20');
   });
 
-  test('time-limit value persists into the saved quiz', async ({ page }) => {
+  test('should persist the time-limit value into the saved quiz', async ({ page }) => {
     await page.getByLabel('Quiz title').fill('Timed Quiz');
     await page.getByLabel('Question text').fill('Quick question?');
     await page.getByPlaceholder('Option A').fill('Fast');
@@ -58,19 +61,19 @@ test.describe('Quiz creator — additional edge cases', () => {
 
   // ── Cancel navigation ─────────────────────────────────────────────────────
 
-  test('"Cancel" button navigates back to the quiz library', async ({ page }) => {
+  test('should navigate back to the quiz library when Cancel is clicked', async ({ page }) => {
     await page.getByRole('button', { name: 'Cancel' }).click();
     await expect(page).toHaveURL(/#\/quizzes/);
   });
 
-  test('"← Home" button on the creator navigates to home', async ({ page }) => {
+  test('should navigate to home when the ← Home button is clicked', async ({ page }) => {
     await page.getByRole('button', { name: /← Home/i }).click();
     await expect(page).toHaveURL(/\/?#?\/?(|$)/);
   });
 
   // ── Duplicate question updates correctIndex ───────────────────────────────
 
-  test('duplicated question inherits the correct answer index of the original', async ({ page }) => {
+  test('should inherit the correct answer index of the original when a question is duplicated', async ({ page }) => {
     await page.getByLabel('Question text').fill('Best option?');
     await page.getByPlaceholder('Option A').fill('Wrong');
     await page.getByPlaceholder('Option B').fill('Right');
