@@ -52,6 +52,7 @@ test.describe('Play screen — streak & feedback', () => {
     const code = (await page.locator('.big-code').first().innerText()).trim();
 
     const player = await context.newPage();
+    await setBypassHeader(player);
     await joinAs(player, code, 'Alice');
 
     // Q1
