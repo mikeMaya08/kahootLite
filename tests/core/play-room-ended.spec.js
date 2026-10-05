@@ -47,7 +47,8 @@ test.describe('Play page edge cases', () => {
     await freshPage.goto(`/#/play/${code}`);
     await freshPage.waitForLoadState('networkidle');
 
-    await expect(freshPage).toHaveURL(new RegExp(`#/join/${code}`));
+    // Without a session identity the app shows the "Room ended" screen on /play.
+    await expect(freshPage.getByText(/Room .* ended/i)).toBeVisible();
 
     await freshCtx.close();
   });
