@@ -36,6 +36,7 @@ test.describe('Play screen — streak & feedback', () => {
   // ── Streak badge ───────────────────────────────────────────────────────────
 
   test('streak badge (🔥) appears after 2 consecutive correct answers', async ({ page, context }) => {
+    await setBypassHeader(page);
     await page.goto('/');
     await page.evaluate((q) => {
       localStorage.setItem('kahootlite:quizzes', JSON.stringify([q]));
