@@ -67,14 +67,13 @@ test.describe('Quiz library — metadata & multi-quiz edge cases', () => {
     await page.getByRole('button', { name: /Add question/i }).click();
 
     // validate() in QuizCreator requires question text + at least 2 options.
-    const questionInputs = page.getByLabel('Question text');
-    await questionInputs.last().fill('Capital of Germany?');
+    // Scope to the last fieldset (the newly added question) to avoid fragile index arithmetic.
+    const lastFieldset = page.locator('fieldset').last();
+    await lastFieldset.waitFor({ state: 'visible', timeout: 10_000 });
 
-    const optionInputs = page.getByLabel(/Option/i);
-    const totalOptions = await optionInputs.count();
-    // The last 4 option inputs belong to the newly added question.
-    await optionInputs.nth(totalOptions - 4).fill('Berlin');
-    await optionInputs.nth(totalOptions - 3).fill('Munich');
+    await lastFieldset.getByPlaceholder('What is the capital of France?').fill('Capital of Germany?');
+    await lastFieldset.getByPlaceholder('Option A').fill('Berlin');
+    await lastFieldset.getByPlaceholder('Option B').fill('Munich');
 
     await page.getByRole('button', { name: /Save quiz/i }).click();
 
