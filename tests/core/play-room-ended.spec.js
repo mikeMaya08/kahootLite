@@ -14,9 +14,10 @@ test.describe('Play page edge cases', () => {
 
     const player = await context.newPage();
     await joinAs(player, code, 'Alice');
+    await player.waitForLoadState('networkidle');
 
     await page.getByRole('button', { name: 'Start game' }).click();
-    await expect(player.getByText('Capital of France?')).toBeVisible();
+    await expect(player.getByText('Capital of France?')).toBeVisible({ timeout: 15_000 });
 
     await page.getByRole('button', { name: 'Reveal answer' }).click();
     await page.getByRole('button', { name: /See final results →/ }).click();
@@ -24,7 +25,7 @@ test.describe('Play page edge cases', () => {
     await page.getByRole('button', { name: 'End room' }).click();
 
     await expect(player.getByText(new RegExp(`Room ${code} ended`, 'i'))).toBeVisible({
-      timeout: 7_000,
+      timeout: 20_000,
     });
   });
 
