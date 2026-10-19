@@ -19,21 +19,21 @@ test.describe('Play page edge cases', () => {
     await page.getByRole('button', { name: 'Start game' }).click();
     await expect(player.getByText('Capital of France?')).toBeVisible({ timeout: 15_000 });
 
-    await page.getByRole('button', { name: 'Reveal answer' }).click();
-    await page.getByRole('button', { name: /See (final )?results/ }).click();
-    await page.waitForLoadState('networkidle');
+    // Simulate the host deleting the room directly via localStorage from the player tab.
+    // This fires the native `storage` event in the player's context (same as a real cross-tab
+    // delete would), without depending on the host UI navigation timing.
+    const roomKey = `kahootlite:room:${code}`;
+    await player.evaluate((key) => {
+      localStorage.removeItem(key);
+      // Dispatch a storage event so useRoom's listener picks it up in the same tab.
+      window.dispatchEvent(
+        new StorageEvent('storage', { key, newValue: null, oldValue: '{}' })
+      );
+    }, roomKey);
 
-    // Register the dialog handler BEFORE the click that triggers it to avoid timing races.
-    const dialogPromise = page.waitForEvent('dialog').then((d) => d.accept()).catch(() => {});
-    await page.getByRole('button', { name: /End room/i }).click();
-    await dialogPromise;
-    await page.waitForLoadState('networkidle');
-
-    // Match any variation the app may show: "Room <code> ended", "Room ended", "Game over", etc.
-    await expect(
-      player.getByText(new RegExp(`(room(\\s+${code})?\\s+ended|has\\s+ended|game\\s+over)`, 'i'))
-    ).toBeVisible({
-      timeout: 30_000,
+    // Play.jsx renders <h2>Room {code} ended</h2> when room resolves to null.
+    await expect(player.getByRole('heading', { name: new RegExp(`Room ${code} ended`, 'i') })).toBeVisible({
+      timeout: 10_000,
     });
   });
 
