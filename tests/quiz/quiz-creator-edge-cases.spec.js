@@ -31,7 +31,7 @@ test.describe('Quiz creator — additional edge cases', () => {
     await page.getByPlaceholder('Option B').fill('No');
     await page.getByRole('button', { name: 'Save quiz' }).click();
 
-    await expect(page.getByText(/Question 1 needs text|title/i)).toBeVisible();
+    await expect(page.getByText('Please add a title.')).toBeVisible();
   });
 
   // ── Time-limit selector ───────────────────────────────────────────────────
