@@ -48,7 +48,7 @@ test.describe('Quiz creator — additional edge cases', () => {
     await page.getByPlaceholder('Option A').fill('Fast');
     await page.getByPlaceholder('Option B').fill('Slow');
 
-    await page.getByLabel(/Time limit/i).first().selectOption('10');
+    await page.getByLabel(/Time limit/i).first().fill('10');
 
     await page.getByRole('button', { name: 'Save quiz' }).click();
     await expect(page).toHaveURL(/#\/quizzes/);
