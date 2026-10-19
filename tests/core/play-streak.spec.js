@@ -69,8 +69,9 @@ test.describe('Play screen — streak & feedback', () => {
     await page.getByRole('button', { name: 'Reveal answer' }).click();
 
     // After 2 consecutive correct answers streak ≥ 2 → 🔥 badge
-    await expect(player.locator('.streak-badge')).toBeVisible();
-    await expect(player.locator('.streak-badge')).toContainText('🔥');
+    // Scope to header to avoid strict-mode violation (.streak-badge also appears in standings list).
+    await expect(player.locator('header .streak-badge')).toBeVisible();
+    await expect(player.locator('header .streak-badge')).toContainText('🔥');
   });
 
   test('streak bonus message "N in a row!" is shown on the reveal card', async ({ page, context }) => {
