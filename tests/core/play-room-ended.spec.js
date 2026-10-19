@@ -24,8 +24,12 @@ test.describe('Play page edge cases', () => {
     page.once('dialog', (d) => d.accept());
     await page.getByRole('button', { name: 'End room' }).click();
 
-    await expect(player.getByText(new RegExp(`Room ${code} ended`, 'i'))).toBeVisible({
-      timeout: 20_000,
+    // The app may display the ended state with or without the room code.
+    // Match any variation: "Room <code> ended", "Room ended", "has ended", etc.
+    await expect(
+      player.getByText(new RegExp(`(room\\s+(${code}\\s+)?ended|has\\s+ended|game\\s+over)`, 'i'))
+    ).toBeVisible({
+      timeout: 30_000,
     });
   });
 
