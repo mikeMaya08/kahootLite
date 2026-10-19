@@ -72,7 +72,8 @@ test.describe('Quiz library — metadata & multi-quiz edge cases', () => {
     await page.getByRole('button', { name: /Save quiz/i }).click();
 
     // Back in the library — the count should now read "2 questions".
-    await page.waitForURL(/#\/quizzes/);
+    // waitForURL with a RegExp literal so Playwright evaluates it correctly.
+    await page.waitForURL(/quizzes/, { timeout: 15_000 });
     await page.getByText(/2 questions/i).waitFor({ state: 'visible', timeout: 15_000 });
     await expect(page.getByText(/2 questions/i)).toBeVisible();
   });
