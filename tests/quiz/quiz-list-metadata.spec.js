@@ -75,7 +75,9 @@ test.describe('Quiz library — metadata & multi-quiz edge cases', () => {
     // Navigating back via hash alone doesn't re-mount the component, so the
     // count stays stale. A full reload lets QuizList re-mount and read the
     // updated quiz from localStorage — the same result the user sees on F5.
-    await page.reload();
+    // Navigate explicitly to /#/quizzes so QuizList mounts fresh and reads
+    // the updated quiz from localStorage (reload() returns to '/', not the list).
+    await page.goto('/#/quizzes');
     await page.waitForLoadState('networkidle');
     await page.getByText(/2 questions/i).waitFor({ state: 'visible', timeout: 15_000 });
     await expect(page.getByText(/2 questions/i)).toBeVisible();
