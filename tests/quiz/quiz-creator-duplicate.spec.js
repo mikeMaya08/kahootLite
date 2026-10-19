@@ -358,7 +358,7 @@ test.describe('Quiz creator — duplicate question', () => {
 
     await page.getByRole('button', { name: /▶ Preview/ }).click();
 
-    await expect(page.getByText('Preview question?')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Preview question?' })).toBeVisible();
   });
 
   test('should insert the clone right after the middle question in a 3-question quiz', { tag: ['@quiz-creator'] }, async ({
