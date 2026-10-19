@@ -20,14 +20,18 @@ test.describe('Play page edge cases', () => {
     await expect(player.getByText('Capital of France?')).toBeVisible({ timeout: 15_000 });
 
     await page.getByRole('button', { name: 'Reveal answer' }).click();
-    await page.getByRole('button', { name: /See final results →/ }).click();
-    page.once('dialog', (d) => d.accept());
-    await page.getByRole('button', { name: 'End room' }).click();
+    await page.getByRole('button', { name: /See (final )?results/ }).click();
+    await page.waitForLoadState('networkidle');
 
-    // The app may display the ended state with or without the room code.
-    // Match any variation: "Room <code> ended", "Room ended", "has ended", etc.
+    // Register the dialog handler BEFORE the click that triggers it to avoid timing races.
+    const dialogPromise = page.waitForEvent('dialog').then((d) => d.accept()).catch(() => {});
+    await page.getByRole('button', { name: /End room/i }).click();
+    await dialogPromise;
+    await page.waitForLoadState('networkidle');
+
+    // Match any variation the app may show: "Room <code> ended", "Room ended", "Game over", etc.
     await expect(
-      player.getByText(new RegExp(`(room\\s+(${code}\\s+)?ended|has\\s+ended|game\\s+over)`, 'i'))
+      player.getByText(new RegExp(`(room(\\s+${code})?\\s+ended|has\\s+ended|game\\s+over)`, 'i'))
     ).toBeVisible({
       timeout: 30_000,
     });
