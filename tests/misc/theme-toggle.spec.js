@@ -100,11 +100,16 @@ test.describe('Theme toggle', () => {
 
   test('light theme preference persists when navigating to quiz library', async ({ page }) => {
     await setBypassHeader(page);
+    // Seed localStorage BEFORE the app mounts so the useEffect reads 'light' on init.
     await page.goto('/');
     await page.evaluate(() =>
       localStorage.setItem('kahootlite:prefs', JSON.stringify({ theme: 'light' }))
     );
-    await page.goto('/#/quizzes');
+    // Reload the page so App.jsx mounts fresh and its useEffect picks up the stored preference.
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+    // Now navigate to quizzes via hash — React stays mounted and the theme should remain 'light'.
+    await page.evaluate(() => { window.location.hash = '/quizzes'; });
     await page.waitForLoadState('networkidle');
 
     const theme = await page.evaluate(
