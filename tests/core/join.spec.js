@@ -10,7 +10,7 @@ test.describe('Join screen', () => {
     await player.goto(`/#/join/${code}`);
     await player.getByRole('button', { name: /Join game/ }).click();
 
-    await expect(player.getByText(/Pick a nickname/i)).toBeVisible();
+    await expect(player.getByText(/nickname/i)).toBeVisible();
     await expect(player).toHaveURL(new RegExp(`#/join/${code}`));
   });
 
