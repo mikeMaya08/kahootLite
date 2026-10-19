@@ -19,7 +19,7 @@ test.describe('Player avatar assignment', () => {
     await joinAs(await context.newPage(), code, 'Alice');
     await joinAs(await context.newPage(), code, 'Bob');
 
-    await expect(page.locator('.badge')).toHaveText('2');
+    await expect(page.locator('h2 span')).toHaveText('2');
 
     const emojis = await readEmojis(page, code);
     expect(emojis[0]).not.toBe(emojis[1]);
@@ -36,7 +36,7 @@ test.describe('Player avatar assignment', () => {
     await joinAs(await context.newPage(), code, 'Bob');
     await joinAs(await context.newPage(), code, 'Carol');
 
-    await expect(page.locator('.badge')).toHaveText('3');
+    await expect(page.locator('h2 span')).toHaveText('3');
 
     const emojis = await readEmojis(page, code);
     const unique = new Set(emojis);
@@ -55,7 +55,7 @@ test.describe('Player avatar assignment', () => {
     await joinAs(await context.newPage(), code, 'Carol');
     await joinAs(await context.newPage(), code, 'Dave');
 
-    await expect(page.locator('.badge')).toHaveText('4');
+    await expect(page.locator('h2 span')).toHaveText('4');
 
     const emojis = await readEmojis(page, code);
     const unique = new Set(emojis);
