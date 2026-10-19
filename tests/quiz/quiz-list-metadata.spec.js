@@ -65,9 +65,16 @@ test.describe('Quiz library — metadata & multi-quiz edge cases', () => {
 
     await page.getByRole('button', { name: /Add question/i }).click();
 
-    // Fill in the new question's text (required to save).
+    // Fill in the new question's text AND at least 2 options — validate() in
+    // QuizCreator requires both before it will save.
     const questionInputs = page.getByLabel('Question text');
     await questionInputs.last().fill('Capital of Germany?');
+
+    const optionInputs = page.getByLabel(/Option/i);
+    const totalOptions = await optionInputs.count();
+    // The last 4 option inputs belong to the newly added question.
+    await optionInputs.nth(totalOptions - 4).fill('Berlin');
+    await optionInputs.nth(totalOptions - 3).fill('Munich');
 
     await page.getByRole('button', { name: /Save quiz/i }).click();
 
