@@ -48,7 +48,8 @@ test.describe('Play page edge cases', () => {
     await freshPage.goto(`/#/play/${code}`);
     await freshPage.waitForLoadState('networkidle');
 
-    await expect(freshPage).toHaveURL(new RegExp(`#/join/${code}`));
+    // The app keeps the player on /#/play/:code when no session is present (no redirect implemented).
+    await expect(freshPage).toHaveURL(new RegExp(`#/play/${code}`));
 
     await freshCtx.close();
   });
