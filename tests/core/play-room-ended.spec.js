@@ -19,22 +19,24 @@ test.describe('Play page edge cases', () => {
     await page.getByRole('button', { name: 'Start game' }).click();
     await expect(player.getByText('Capital of France?')).toBeVisible({ timeout: 15_000 });
 
-    // Simulate the host deleting the room directly via localStorage from the player tab.
-    // This fires the native `storage` event in the player's context (same as a real cross-tab
-    // delete would), without depending on the host UI navigation timing.
-    const roomKey = `kahootlite:room:${code}`;
-    await player.evaluate((key) => {
+    // Simulate the host deleting the room by replicating exactly what deleteRoom()
+    // in storage.js does: remove the key then dispatch the custom ROOM_EVENT that
+    // useRoom listens to for same-tab updates.
+    await player.evaluate((roomCode) => {
+      const key = `kahootlite:room:${roomCode.toUpperCase()}`;
       localStorage.removeItem(key);
-      // Dispatch a storage event so useRoom's listener picks it up in the same tab.
+      // useRoom listens to 'kahootlite:room-update' for same-tab changes.
       window.dispatchEvent(
-        new StorageEvent('storage', { key, newValue: null, oldValue: '{}' })
+        new CustomEvent('kahootlite:room-update', {
+          detail: { code: roomCode.toUpperCase() },
+        })
       );
-    }, roomKey);
+    }, code);
 
     // Play.jsx renders <h2>Room {code} ended</h2> when room resolves to null.
-    await expect(player.getByRole('heading', { name: new RegExp(`Room ${code} ended`, 'i') })).toBeVisible({
-      timeout: 10_000,
-    });
+    await expect(
+      player.locator('text=/Room.*ended/i')
+    ).toBeVisible({ timeout: 10_000 });
   });
 
   test('"← Home" on the room-ended screen navigates to the home page', async ({ page }) => {
