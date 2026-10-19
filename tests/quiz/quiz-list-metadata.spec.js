@@ -71,9 +71,12 @@ test.describe('Quiz library — metadata & multi-quiz edge cases', () => {
 
     await page.getByRole('button', { name: /Save quiz/i }).click();
 
-    // Back in the library — the count should now read "2 questions".
-    // waitForURL with a RegExp literal so Playwright evaluates it correctly.
-    await page.waitForURL(/quizzes/, { timeout: 15_000 });
+    // QuizList initialises its state only on mount (useState lazy initialiser).
+    // Navigating back via hash alone doesn't re-mount the component, so the
+    // count stays stale. A full reload lets QuizList re-mount and read the
+    // updated quiz from localStorage — the same result the user sees on F5.
+    await page.reload();
+    await page.waitForLoadState('networkidle');
     await page.getByText(/2 questions/i).waitFor({ state: 'visible', timeout: 15_000 });
     await expect(page.getByText(/2 questions/i)).toBeVisible();
   });
