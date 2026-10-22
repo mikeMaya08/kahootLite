@@ -23,7 +23,7 @@ test.describe('Quiz library — deletion', () => {
     // Scope the Delete button to Alpha Quiz's card to avoid ambiguity.
     const alphaCard = page.locator('li, [class*="quiz-card"], article').filter({ hasText: 'Alpha Quiz' }).first();
     page.on('dialog', (d) => d.accept());
-    await alphaCard.getByRole('button', { name: 'Delete' }).click();
+    await alphaCard.getByRole('button', { name: 'Delete' }).first().click();
 
     // Alpha Quiz is gone; Beta Quiz is still there.
     await expect(page.getByRole('heading', { name: 'Alpha Quiz' })).not.toBeVisible();
