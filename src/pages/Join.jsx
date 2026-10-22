@@ -64,7 +64,7 @@ export default function Join() {
       setError('Enter a nickname to continue.');
       return;
     }
-    if (trimmed.length > 30) {
+    if (trimmed.length > 20) {
       setError('Nickname must be 20 characters or fewer.');
       return;
     }

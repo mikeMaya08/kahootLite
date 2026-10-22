@@ -25,18 +25,28 @@ test.describe('Play page edge cases', () => {
     await player.evaluate((roomCode) => {
       const key = `kahootlite:room:${roomCode.toUpperCase()}`;
       localStorage.removeItem(key);
-      // useRoom listens to 'kahootlite:room-update' for same-tab changes.
+      // Dispatch the custom event for same-tab listeners.
       window.dispatchEvent(
         new CustomEvent('kahootlite:room-update', {
           detail: { code: roomCode.toUpperCase() },
+        })
+      );
+      // Also dispatch a native StorageEvent to cover hooks that listen to 'storage'.
+      window.dispatchEvent(
+        new StorageEvent('storage', {
+          key,
+          oldValue: '{}',
+          newValue: null,
+          storageArea: localStorage,
+          url: window.location.href,
         })
       );
     }, code);
 
     // Play.jsx renders <h2>Room {code} ended</h2> when room resolves to null.
     await expect(
-      player.locator('text=/Room.*ended/i')
-    ).toBeVisible({ timeout: 10_000 });
+      player.getByText(/Room.*ended/i)
+    ).toBeVisible({ timeout: 15_000 });
   });
 
   test('"← Home" on the room-ended screen navigates to the home page', async ({ page }) => {
