@@ -15,17 +15,21 @@ test.describe('CandyMapper - Contact Form', () => {
   });
 
   test('shows email validation error then succeeds on valid submission', { tag: ['@contact', '@smoke', '@validation'] }, async ({ page }) => {
-    const form = page.locator('[data-aid="CONTACT_FORM_CONTAINER_REND"]');
+    // Use the stable contact section widget id as the form container
+    const form = page.locator('[id="13177999-c08f-4f9c-ba5a-5b9aab59e4b5"]');
 
-    // Type First Name, blur, then submit — should trigger email validation error
+    // Scroll into view to ensure the form is visible before interacting
+    await form.scrollIntoViewIfNeeded();
+
+    // Type First Name then submit without an email — should trigger email validation error
     await form.locator('input[data-aid="First Name"]').type('Miguel');
     await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
     await expect(
-      form.locator('[data-aid="CONTACT_EMAIL_ERR_REND"]')
-    ).toHaveText(/please enter a valid email address/i, { timeout: 15000 });
+      form.locator(':text-matches("please enter a valid email address", "i")')
+    ).toBeVisible({ timeout: 15000 });
 
     // Enter a valid email and re-submit
-    await form.locator('input[data-aid="CONTACT_FORM_EMAIL"]').type('migue@mailinator.com');
+    await form.locator('input[id="input10"]').type('migue@mailinator.com');
     await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
 
     // Verify the success confirmation message
