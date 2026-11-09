@@ -1,8 +1,12 @@
 import { test, expect } from '@playwright/test';
 
+// External site and test inbox come from env, with the previous values as defaults.
+const CONTACT_FORM_URL = process.env.CONTACT_FORM_URL || 'https://candymapper.com/';
+const TEST_CONTACT_EMAIL = process.env.TEST_CONTACT_EMAIL || 'migue@mailinator.com';
+
 test.describe('CandyMapper - Contact Form', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://candymapper.com/');
+    await page.goto(CONTACT_FORM_URL);
 
     // Dismiss the Pop-Up Challenge modal using the X close icon
     const modal = page.locator('[data-aid="POPUP_MODAL"]');
@@ -25,7 +29,7 @@ test.describe('CandyMapper - Contact Form', () => {
     ).toHaveText(/please enter a valid email address/i, { timeout: 15000 });
 
     // Enter a valid email and re-submit
-    await form.locator('input[data-aid="CONTACT_FORM_EMAIL"]').type('migue@mailinator.com');
+    await form.locator('input[data-aid="CONTACT_FORM_EMAIL"]').type(TEST_CONTACT_EMAIL);
     await form.locator('[data-aid="CONTACT_SUBMIT_BUTTON_REND"]').click();
 
     // Verify the success confirmation message
