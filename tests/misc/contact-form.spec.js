@@ -1,8 +1,12 @@
 import { test, expect } from '@playwright/test';
 
+// External site and test inbox come from env, with the previous values as defaults.
+const CONTACT_FORM_URL = process.env.CONTACT_FORM_URL || 'https://candymapper.com/';
+const TEST_CONTACT_EMAIL = process.env.TEST_CONTACT_EMAIL || 'migue@mailinator.com';
+
 test.describe('CandyMapper - Contact Form', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://candymapper.com/');
+    await page.goto(CONTACT_FORM_URL);
 
     // Dismiss the Pop-Up Challenge modal using the X close icon
     const modal = page.locator('[data-aid="POPUP_MODAL"]');
