@@ -6,7 +6,7 @@ import QuizList from './pages/QuizList';
 import Host from './pages/Host';
 import Join from './pages/Join';
 import Play from './pages/Play';
-import { loadPrefs, savePrefs } from './utils/storage';
+import { loadPrefs, savePrefs } from './utils/storage-v2';
 
 function ThemeToggle() {
   const prefs = loadPrefs();
